@@ -1,0 +1,36 @@
+apr 03, 2020 11:31:49 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Accensione server
+apr 03, 2020 11:31:49 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Partita di Tablut
+apr 03, 2020 11:31:49 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Waiting for white connection..
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: White player connected
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Lettura nome player bianco in corso..
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: White player name:	random
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Waiting for Black connection..
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Accettata connessione con client giocatore Nero
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Lettura nome player nero in corso..
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Black player name:	random
+apr 03, 2020 11:32:17 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Invio messaggio ai giocatori
+apr 03, 2020 11:32:17 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Lettura mossa player W in corso..
+apr 03, 2020 11:32:19 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Move received.	Turn: W Pawn from d5 to d3
+apr 03, 2020 11:32:19 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Invio messaggio ai client
+apr 03, 2020 11:32:19 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Lettura mossa player B in corso..
+apr 03, 2020 11:32:21 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Move received.	Turn: B Pawn from e8 to g8
+apr 03, 2020 11:32:21 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Invio messaggio ai client
+apr 03, 2020 11:32:21 AM it.unibo.ai.didattica.competition.tablut.server.Server run
+BUONO: Lettura mossa player W in corso..

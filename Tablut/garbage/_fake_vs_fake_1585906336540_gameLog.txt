@@ -1,0 +1,93 @@
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut <init>
+BUONO: Players:	fake	vs	fake
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut <init>
+BUONO: Repeated moves allowed:	99	Cache:	0
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut <init>
+BUONO: Inizio partita
+apr 03, 2020 11:32:16 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut <init>
+BUONO: Stato:
+OOOBBBOOO
+OOOOBOOOO
+OOOOWOOOO
+BOOOWOOOB
+BBWWKWWBB
+BOOOWOOOB
+OOOOWOOOO
+OOOOBOOOO
+OOOBBBOOO
+-
+B
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e4 to d3
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e3 to h8
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from c5 to i3
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from d5 to g4
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from f5 to c2
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e5 to b8
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from d5 to c6
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e5 to i7
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e5 to f6
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+AVVERTENZA: Mossa in diagonale
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from d5 to d3
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut movePawn
+BUONO: Movimento pedina
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Current draw cache size: 1
+apr 03, 2020 11:32:18 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Stato:
+OOOBBBOOO
+OOOOBOOOO
+OOOWWOOOO
+BOOOWOOOB
+BBWOKWWBB
+BOOOWOOOB
+OOOOWOOOO
+OOOOBOOOO
+OOOBBBOOO
+-
+B
+apr 03, 2020 11:32:22 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Turn: W Pawn from e4 to d4
+apr 03, 2020 11:32:22 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut movePawn
+BUONO: Movimento pedina
+apr 03, 2020 11:32:22 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Current draw cache size: 1
+apr 03, 2020 11:32:22 AM it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut checkMove
+BUONO: Stato:
+OOOBBBOOO
+OOOOBOOOO
+OOOWWOOOO
+BOOWOOOOB
+BBWOKWWBB
+BOOOWOOOB
+OOOOWOOOO
+OOOOOOBOO
+OOOBBBOOO
+-
+B
