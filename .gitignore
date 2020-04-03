@@ -52,4 +52,5 @@ Mkfile.old
 dkms.conf
 
 # Inteelij
-.idea
+*.idea
+*.iml
