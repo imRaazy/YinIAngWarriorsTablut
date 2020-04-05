@@ -1,3 +1,8 @@
+# Useless folders
+Tablut/bin/
+Tablut/logs/
+Tablut/garbage/
+
 # Prerequisites
 *.d
 
@@ -54,3 +59,6 @@ dkms.conf
 # Inteelij
 *.idea
 *.iml
+
+#kotlin
+kotlin*.jar
