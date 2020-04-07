@@ -63,10 +63,10 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         return movePawn(state, action)
     }
     /**
-     *  Return all possible actions available from the current state
+     *  Return all possible actions available from the given state
      *  @param state
-     *      current state
-     *  @return list of possible actions form state p0 or emptyList
+     *      given state
+     *  @return list of possible actions form state or emptyList
      */
     override fun getActions(state: State?): MutableList<Action> {
         val actions = mutableListOf<Action>()
@@ -109,9 +109,26 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         }
         return actions
     }
-
-    override fun getUtility(p0: State?, p1: State.Turn?): Double {
-        TODO("Not yet implemented")
+    /**
+     * Heuristic function that evaluates a given state from a player's point of view
+     * @param state
+     *          given state
+     * @param turn
+     *          player role
+     * @return evaluation
+     */
+    override fun getUtility(state: State?, turn: State.Turn?): Double {
+        if (state !is State || turn !is State.Turn)
+            return Double.MIN_VALUE
+        var evalWhite = 0.0
+        var evalBlack = 0.0
+        // Placeholder for the real heuristic function
+        state.board.forEach { it.forEach { p ->
+            if ( p == State.Pawn.WHITE || p == State.Pawn.KING )
+                evalWhite++
+            else if ( p == State.Pawn.BLACK )
+                evalBlack++
+        }}
+        return if (turn == State.Turn.WHITE) evalWhite else evalBlack
     }
-
 }
