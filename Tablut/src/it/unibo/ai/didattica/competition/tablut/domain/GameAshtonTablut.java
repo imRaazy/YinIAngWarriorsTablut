@@ -687,8 +687,8 @@ public class GameAshtonTablut implements Game {
 		this.movesWithutCapturing++;
 		return state;
 	}
-
-	private State movePawn(State state, Action a) {
+	// Ho cambiato lo scope della funzione perchè utile in PlayerGame
+	protected State movePawn(State state, Action a) {
 		State.Pawn pawn = state.getPawn(a.getRowFrom(), a.getColumnFrom());
 		State.Pawn[][] newBoard = state.getBoard();
 		// State newState = new State();

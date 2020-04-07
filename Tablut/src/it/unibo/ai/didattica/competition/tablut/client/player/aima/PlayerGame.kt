@@ -5,6 +5,7 @@ import it.unibo.ai.didattica.competition.tablut.util.Column
 import it.unibo.ai.didattica.competition.tablut.domain.Action
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut
 import it.unibo.ai.didattica.competition.tablut.domain.State
+import it.unibo.ai.didattica.competition.tablut.domain.StateTablut
 
 /*  Game interface implemented by  GameAshtonTablut is different
     form the Game interface implemented by PlayerGame: the first
@@ -17,8 +18,54 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
 
     // Aima Game methods
     /**
+     * Get initial game state
+     * @return initial game state
+     */
+    override fun getInitialState(): State {
+        return StateTablut()
+    }
+    /**
+     * Check if the given state is terminal
+     * @param state
+     *          given state
+     * @return true if the state is terminal or false vice versa
+     */
+    override fun isTerminal(state: State?): Boolean {
+        return state?.turn == State.Turn.BLACKWIN || state?.turn == State.Turn.WHITEWIN ||
+               state?.turn == State.Turn.DRAW
+    }
+    /**
+     * Get the player of a given state
+     * @param state
+     *          given state
+     * @return player
+     */
+    override fun getPlayer(state: State?): State.Turn {
+        return state?.turn!!
+    }
+    /**
+     * Get players
+     * @return players
+     */
+    override fun getPlayers(): Array<State.Turn> {
+        return arrayOf(State.Turn.BLACK, State.Turn.WHITE)
+    }
+    /**
+     * Update the given status with the given action
+     * @param state
+     *          given state
+     * @param action
+     *          given and allowed action
+     * @return
+     *      updated state
+     */
+    override fun getResult(state: State?, action: Action?): State {
+        return movePawn(state, action)
+    }
+    /**
      *  Return all possible actions available from the current state
-     *  @param state current state
+     *  @param state
+     *      current state
      *  @return list of possible actions form state p0 or emptyList
      */
     override fun getActions(state: State?): MutableList<Action> {
@@ -62,27 +109,8 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         }
         return actions
     }
-    override fun getInitialState(): State {
-        TODO("Not yet implemented")
-    }
-
-    override fun getResult(p0: State?, p1: Action?): State {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPlayer(p0: State?): State.Turn {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPlayers(): Array<State.Turn> {
-        TODO("Not yet implemented")
-    }
 
     override fun getUtility(p0: State?, p1: State.Turn?): Double {
-        TODO("Not yet implemented")
-    }
-
-    override fun isTerminal(p0: State?): Boolean {
         TODO("Not yet implemented")
     }
 
