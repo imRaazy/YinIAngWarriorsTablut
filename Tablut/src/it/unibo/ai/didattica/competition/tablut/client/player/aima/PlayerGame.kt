@@ -61,7 +61,22 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      *      updated state
      */
     override fun getResult(state: State?, action: Action?): State {
-        return movePawn(state, action)
+        return movePawn(state?.clone(), action)
+    }
+    /**
+     * A utility function (also called an objective function or payoff function),
+     * defines the final numeric value for a game that ends in terminal state s for a player p
+     * @param state
+     *          given state
+     * @param turn
+     *          player role
+     * @return evaluation
+     */
+    override fun getUtility(state: State?, turn: State.Turn?): Double {
+        if (state !is State || turn !is State.Turn)
+            return Double.MIN_VALUE
+        return if (turn == State.Turn.WHITE) state.getNumberOf(State.Pawn.WHITE).toDouble() + 1
+               else state.getNumberOf(State.Pawn.BLACK).toDouble()
     }
     /**
      *  Returns the set of legal moves in a state
@@ -109,28 +124,5 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
             }
         }
         return actions
-    }
-    /**
-     * A utility function (also called an objective function or payoff function),
-     * defines the final numeric value for a game that ends in terminal state s for a player p
-     * @param state
-     *          given state
-     * @param turn
-     *          player role
-     * @return evaluation
-     */
-    override fun getUtility(state: State?, turn: State.Turn?): Double {
-        if (state !is State || turn !is State.Turn)
-            return Double.MIN_VALUE
-        var evalWhite = 0.0
-        var evalBlack = 0.0
-        // Placeholder for the real heuristic function
-        state.board.forEach { it.forEach { p ->
-            if ( p == State.Pawn.WHITE || p == State.Pawn.KING )
-                evalWhite++
-            else if ( p == State.Pawn.BLACK )
-                evalBlack++
-        }}
-        return if (turn == State.Turn.WHITE) evalWhite else evalBlack
     }
 }
