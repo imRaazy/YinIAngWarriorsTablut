@@ -2,6 +2,7 @@
 Tablut/bin/
 Tablut/logs/
 Tablut/garbage/
+*.pdf
 
 # Prerequisites
 *.d
