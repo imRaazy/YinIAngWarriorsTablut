@@ -23,7 +23,6 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
         // Setting up the initial state and player turn
         initialState = StateTablut()
         initialState.turn = role?.let { State.Turn.valueOf(it.toUpperCase()) }
-        println("Current state:\n${initialState}")
         // Setting up the game model
         game = PlayerGame(
                 initialState,
@@ -34,7 +33,7 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 "placeholder"
         )
         // Setting up the search strategy
-        search = AlphaBetaSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 60)
+        search = AlphaBetaSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout)
         search.setLogEnabled(true)
         declareName()
         while (true) {
