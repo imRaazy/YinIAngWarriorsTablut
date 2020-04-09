@@ -40,12 +40,18 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
             state = currentState
             println("Current state:\n$state")
             if (state.turn == player) {
-                val a = search.makeDecision(state)
-                println("Chosen move = $a")
-                write(a)
+                val (action, duration) = executeAndMeasureTimeSeconds { search.makeDecision(state) }
+                println("Chosen move = $action\n Takes: $duration seconds")
+                write(action)
             } else {
                 println("Waiting for the opposite move...")
             }
         }
+    }
+
+    private fun <R> executeAndMeasureTimeSeconds(block: () -> R): Pair<R, Double> {
+        val start = System.currentTimeMillis()
+        val result = block()
+        return result to ((System.currentTimeMillis() - start) / 1000.0)
     }
 }
