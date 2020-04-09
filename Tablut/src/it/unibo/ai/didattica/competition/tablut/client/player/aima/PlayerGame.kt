@@ -25,7 +25,8 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         return StateTablut()
     }
     /**
-     * Check if the given state is terminal
+     * A terminal test, which is true when the game is over and false TERMINAL STATES otherwise.
+     * States where the game has ended are called terminal states
      * @param state
      *          given state
      * @return true if the state is terminal or false vice versa
@@ -35,7 +36,7 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
                state?.turn == State.Turn.DRAW
     }
     /**
-     * Get the player of a given state
+     * Defines which player has the move in a state
      * @param state
      *          given state
      * @return player
@@ -51,7 +52,7 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         return arrayOf(State.Turn.BLACK, State.Turn.WHITE)
     }
     /**
-     * Update the given status with the given action
+     * The transition model, which defines the result of a move
      * @param state
      *          given state
      * @param action
@@ -63,7 +64,7 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         return movePawn(state, action)
     }
     /**
-     *  Return all possible actions available from the given state
+     *  Returns the set of legal moves in a state
      *  @param state
      *      given state
      *  @return list of possible actions form state or emptyList
@@ -110,7 +111,8 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         return actions
     }
     /**
-     * Heuristic function that evaluates a given state from a player's point of view
+     * A utility function (also called an objective function or payoff function),
+     * defines the final numeric value for a game that ends in terminal state s for a player p
      * @param state
      *          given state
      * @param turn
