@@ -2,6 +2,7 @@ package it.unibo.ai.didattica.competition.tablut.client.player
 
 import aima.core.search.adversarial.IterativeDeepeningAlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.TablutClient
+import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.PlayerGame
 import it.unibo.ai.didattica.competition.tablut.domain.*
 
@@ -33,7 +34,8 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 "placeholder"
         )
         // Setting up the search strategy
-        search = IterativeDeepeningAlphaBetaSearch(game, Double.MIN_VALUE, Double.MAX_VALUE, timeout)
+        search = AlphaBetaSearch(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 60)
+        search.setLogEnabled(true)
         declareName()
         while (true) {
             read()
@@ -41,7 +43,7 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
             println("Current state:\n$state")
             if (state.turn == player) {
                 val (action, duration) = executeAndMeasureTimeSeconds { search.makeDecision(state) }
-                println("Chosen move = $action\n Takes: $duration seconds")
+                println("Chosen move = $action\nTakes: $duration seconds")
                 write(action)
             } else {
                 println("Waiting for the opposite move...")
