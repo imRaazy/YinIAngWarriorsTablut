@@ -23,36 +23,11 @@ class AlphaBetaSearch(game: Game<State, Action, State.Turn>?, utilMin: Double, u
     }
 
     private fun evalBlack(state: State): Double {
-        val numberOfWhiteFactor = 0.3
-        val kingEncirclementFactor = 0.7
-        val numberOfWhite = state.getNumberOf(State.Pawn.WHITE)
-        val kingPosition = getKing(state)
-        var kingEncirclement = 0
-        (-1 .. 1).forEach { r ->
-            (-1 .. 1).forEach { c ->
-                if (kingPosition != null) {
-                    println("${kingPosition.first + r}  ${kingPosition.second + c}")
-                    if (state.getPawn(kingPosition.first + r, kingPosition.second + c) == State.Pawn.BLACK)
-                        kingEncirclement += 50
-                }
-            }
-        }
-//        print("numero di bianchi: $numberOfWhite\t accerchiamento:$kingEncirclement\t")
-//        println(numberOfWhiteFactor * numberOfWhite/0.7 + kingEncirclementFactor * kingEncirclement)
-        return numberOfWhiteFactor * numberOfWhite/0.7 + kingEncirclementFactor * kingEncirclement
+        return Double.NEGATIVE_INFINITY
     }
 
     private fun evalWhite(state: State): Double {
         return Double.NEGATIVE_INFINITY
     }
-
-    private fun getKing(state: State): Pair<Int, Int>? {
-        state.board.indices.forEach { r ->
-            state.board.indices.forEach { c ->
-                    if (state.getPawn(r, c) == State.Pawn.KING)
-                        return Pair(r, c)
-                }
-        }
-        return null
-    }
+    
 }
