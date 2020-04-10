@@ -4,6 +4,9 @@ Tablut/logs/
 Tablut/garbage/
 *.pdf
 
+# Mac DS_Store shit
+*.DS_Store
+
 # Prerequisites
 *.d
 
