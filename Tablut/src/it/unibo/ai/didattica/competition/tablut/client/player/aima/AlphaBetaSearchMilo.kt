@@ -17,15 +17,14 @@ class AlphaBetaSearchMilo(game: Game<State, Action, State.Turn>?, utilMin: Doubl
      * @return evaluation
      */
     override fun eval(state: State, turn: State.Turn): Double {
-        if (game.isTerminal(state))
-            return game.getUtility(state, turn)
+        super.eval(state, turn)
         return if (turn == State.Turn.BLACK) evalBlack(state) else evalWhite(state)
     }
 
     private fun evalBlack(state: State): Double {
         val numberOfWhiteFactor = 0.3
         val numberOfBlackFactor = 0.3
-        val kingEncirclementFactor = 0.4
+        val kingEncirclementFactor = 0.7
         val whiteEatingFactor = 0.3
         // NumberOfPawns
         val numberOfBlack = state.getNumberOf(State.Pawn.BLACK)
@@ -63,14 +62,13 @@ class AlphaBetaSearchMilo(game: Game<State, Action, State.Turn>?, utilMin: Doubl
         return null
     }
     private fun getPawnEncirclement(state: State, position: Pair<Int, Int>, increaseFactor: Int): Int {
-        val boardRange = (0 .. state.board.size)
         var kingEncirclement = 0
         listOf(-1, 1).forEach { r ->
-            if ((position.first + r) in boardRange && state.getPawn(position.first + r, position.second) == State.Pawn.BLACK)
+            if ((position.first + r) in state.board.indices && state.getPawn(position.first + r, position.second) == State.Pawn.BLACK)
                 kingEncirclement += increaseFactor
         }
         listOf(-1, 1).forEach { c ->
-            if ((position.second + c) in boardRange && state.getPawn(position.first, position.second + c) == State.Pawn.BLACK)
+            if ((position.second + c) in state.board.indices && state.getPawn(position.first, position.second + c) == State.Pawn.BLACK)
                 kingEncirclement += increaseFactor
         }
         return kingEncirclement
