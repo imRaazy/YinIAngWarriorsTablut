@@ -7,6 +7,7 @@ import it.unibo.ai.didattica.competition.tablut.domain.State
 
 class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Double, utilMax: Double, time: Int) :
         IterativeDeepeningAlphaBetaSearch<State, Action, State.Turn>(game, utilMin, utilMax, time) {
+
     /**
      * Heuristic function that evaluate the correctness of the given
      * state if it is not terminal otherwise return the value of getUtils
@@ -16,24 +17,52 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
      *          player role
      * @return evaluation
      */
+
     override fun eval(state: State, turn: State.Turn): Double {
         if (game.isTerminal(state))
             return game.getUtility(state, turn)
         return if (turn == State.Turn.BLACK) evalBlack(state) else evalWhite(state)
     }
 
+    //milo's black code
     private fun evalBlack(state: State): Double {
-        return Double.NEGATIVE_INFINITY
-        //todo: fill with black eval function
+        val numberOfWhiteFactor = 0.3
+        val numberOfBlackFactor = 0.3
+        val kingEncirclementFactor = 0.4
+        val whiteEatingFactor = 0.3
+        // NumberOfPawns
+        val numberOfBlack = state.getNumberOf(State.Pawn.BLACK)
+        val numberOfWhite = state.getNumberOf(State.Pawn.WHITE)
+        // KingEncirclement
+        var kingEncirclement = getKing(state)?.let { getPawnEncirclementBlack(state, it, 20) }
+        // WhiteEating
+        var whiteEating = 0
+        state.board.indices.forEach { r ->
+            state.board.indices.forEach { c ->
+                if (state.getPawn(r, c) == State.Pawn.WHITE)
+                    whiteEating += getPawnEncirclementBlack(state, Pair(r, c), 5)
+            }
+        }
+        state.board.indices.forEach { r ->
+            state.board.indices.forEach { c ->
+                if (state.getPawn(r, c) == State.Pawn.WHITE)
+                    whiteEating += getPawnEncirclementBlack(state, Pair(r, c), 5)
+            }
+        }
+        return kingEncirclementFactor * kingEncirclement!! + whiteEatingFactor * whiteEating - numberOfWhite
     }
 
     //trying to move white paws away from king and close to black pawns
     private fun evalWhite(state: State): Double {
+        println("\nCOLONNA")
+        println(getCol(4, state))
+        println("\nRIGA")
+        println(getRow(4, state))
         return when (getNextMove(state)) {
             0 -> Double.NEGATIVE_INFINITY  //horizontal or vertical free -> todo: go towards victory
             1 -> moveWhiteFarFromKing(state) //king surrounded by whites -> move white away to get the king gang banged from blacks
             2 -> moveWhiteCloseToKing(state) //king feels alone & it's gonna be eat soon -> move white towards king
-            3 -> eatBlacks(state) //three black around king -> eat them with some white too free the king
+            3 -> eatBlacks(state) //three black around king -> eat them with some white to free the king
             else -> Double.NEGATIVE_INFINITY
         }
     }
@@ -43,31 +72,62 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         val pawnsSurrounding = mutableMapOf<String, State.Pawn>()
         var whiteCounter = 0
         var blackCounter = 0
+        var emptyCounter = 0
 
         if (kingPosition != null) {
             if (kingPosition.first != 0)
                 pawnsSurrounding["up"] = state.getPawn(kingPosition.first - 1, kingPosition.second)
-            if (kingPosition.first != 8)
+            if (kingPosition.first != state.board.size-1)
                 pawnsSurrounding["down"] = state.getPawn(kingPosition.first + 1, kingPosition.second)
             if (kingPosition.second != 0)
                 pawnsSurrounding["left"] = state.getPawn(kingPosition.first, kingPosition.second - 1)
-            if (kingPosition.second != 8)
+            if (kingPosition.second != state.board.size-1)
                 pawnsSurrounding["right"] = state.getPawn(kingPosition.first, kingPosition.second + 1)
         }
 
-        pawnsSurrounding.values.forEach { if (it == State.Pawn.WHITE) whiteCounter++ else blackCounter++ }
+        pawnsSurrounding.values.forEach { if ( it == State.Pawn.WHITE ) whiteCounter++ else if ( it == State.Pawn.BLACK ) blackCounter++ else emptyCounter++ }
+        //pawnsSurrounding.values.forEach { if ( it == State.Pawn.WHITE ) whiteCounter++ else blackCounter++ }
 
         return if( pawnsSurrounding["up"] == State.Pawn.EMPTY && pawnsSurrounding["down"] == State.Pawn.EMPTY ||
                 pawnsSurrounding["left"] == State.Pawn.EMPTY && pawnsSurrounding["right"] == State.Pawn.EMPTY ) 0  //horizontal or vertical free -> go towards victory
-        else if ( whiteCounter > 0 ) 1; //king surrounded by whites -> move white away to get black around
+        else if ( whiteCounter > 0 ) 1 //king surrounded by whites -> move white away to get black around
         else if( pawnsSurrounding.values.all { it != State.Pawn.WHITE } ) 2 //king feels alone & it's gonna be eat soon -> move white towards king
-        else 3 //three black around king -> eat them with some white too free the king
-
+        else 3 //three black around king -> eat them with some white to free the king
     }
 
     //eat some black pawns to free the king
     private fun eatBlacks (state: State): Double {
-        return getPawnEncirclement(state, getKing(state)!!, 10).toDouble()
+        //todo: move in order to eat on the next move
+        var score = 0;
+        var white = 0
+        state.board.indices.forEach { r ->
+            var row = getRow(r, state)
+            if(row.trim(State.Pawn.EMPTY.toString()[0]).matches(Regex.fromLiteral("WBW"))) {
+                score += 10
+                white += countWhiteSpaces(row)
+            }
+            var col = getCol(r, state)
+            if(col.trim(State.Pawn.EMPTY.toString()[0]).matches(Regex.fromLiteral("WBW"))) {
+                score += 10
+                white += countWhiteSpaces(col)
+            }
+        }
+        return score + getPawnEncirclement(state, getKing(state)!!, 50) + 1/white
+    }
+
+    private fun countWhiteSpaces(lineOrig: String) : Int {
+        var line = lineOrig
+        if(line.contains(("WB")))
+            line = reverseLine(line)
+        line = line.substringBefore("BW")
+        while(line.contains("W")) { line = line.substringAfter("W") }
+        return line.length
+    }
+
+    private fun reverseLine (line: String) : String {
+        var reversed = ""
+        for(i in 9 downTo 0) reversed += line[i]
+        return reversed
     }
 
     //move white towards king to avoid match lost
@@ -75,7 +135,6 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         val kingEncirclementFactor = 0.65
         val numberOfBlack = state.getNumberOf(State.Pawn.BLACK)
         val kingPosition = getKing(state)
-
         var kingEncirclement = 0
 
         // buffing weights as king gets alone
@@ -86,10 +145,10 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
             if (kingPosition.second != 0) {
                 kingEncirclement += if (state.getPawn(kingPosition.first, kingPosition.second-1) == State.Pawn.WHITE) 100 else 0
             };
-            if (kingPosition.first != 8) {
+            if (kingPosition.first != state.board.size-1) {
                 kingEncirclement += if (state.getPawn(kingPosition.first+1, kingPosition.second) == State.Pawn.WHITE) 100 else 0
             };
-            if (kingPosition.second != 8) {
+            if (kingPosition.second != state.board.size-1) {
                 kingEncirclement += if (state.getPawn(kingPosition.first, kingPosition.second+1) == State.Pawn.WHITE) 100 else 0
             };
         };
@@ -117,10 +176,10 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
             if (kingPosition.second != 0) {
                 kingFree += if (state.getPawn(kingPosition.first, kingPosition.second-1) == State.Pawn.EMPTY) 100 else 0
             };
-            if (kingPosition.first != 8) {
+            if (kingPosition.first != state.board.size-1) {
                 kingFree += if (state.getPawn(kingPosition.first+1, kingPosition.second) == State.Pawn.EMPTY) 100 else 0
             };
-            if (kingPosition.second != 8) {
+            if (kingPosition.second != state.board.size-1) {
                 kingFree += if (state.getPawn(kingPosition.first, kingPosition.second+1) == State.Pawn.EMPTY) 100 else 0
             };
         };
@@ -135,10 +194,10 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
                     if (c != 0) {
                         pawnBlackBuff += if (state.getPawn(r, c - 1) == State.Pawn.BLACK) 10 else 0
                     };
-                    if (r != 8) {
+                    if (r != state.board.size-1) {
                         pawnBlackBuff += if (state.getPawn(r + 1, c) == State.Pawn.BLACK) 10 else 0
                     };
-                    if (c != 8) {
+                    if (c != state.board.size-1) {
                         pawnBlackBuff += if (state.getPawn(r, c + 1) == State.Pawn.BLACK) 10 else 0
                     };
                 }
@@ -162,18 +221,30 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
     }
 
     // Utility: look the cross around the pawn given
-    private fun getPawnEncirclement(state: State, position: Pair<Int, Int>, increaseFactor: Int): Int {
-        val boardRange = (0 .. state.board.size)
+    private fun getPawnEncirclement(state: State, position: Pair<Int, Int>, increaseFactor: Int): Double {
         var pawnEncirclement = 0
         listOf(-1, 1).forEach { r ->
-            if ((position.first + r) in boardRange && state.getPawn(position.first + r, position.second) != State.Pawn.BLACK)
+            if ((position.first + r) in state.board.indices  && state.getPawn(position.first + r, position.second) != State.Pawn.BLACK)
                 pawnEncirclement += increaseFactor
         }
         listOf(-1, 1).forEach { c ->
-            if ((position.second + c) in boardRange && state.getPawn(position.first, position.second + c) != State.Pawn.BLACK)
+            if ((position.second + c) in state.board.indices  && state.getPawn(position.first, position.second + c) != State.Pawn.BLACK)
                 pawnEncirclement += increaseFactor
         }
-        return pawnEncirclement
+        return pawnEncirclement.toDouble()
+    }
+
+    private fun getPawnEncirclementBlack(state: State, position: Pair<Int, Int>, increaseFactor: Int): Int {
+        var kingEncirclement = 0
+        listOf(-1, 1).forEach { r ->
+            if ((position.first + r) in state.board.indices && state.getPawn(position.first + r, position.second) == State.Pawn.BLACK)
+                kingEncirclement += increaseFactor
+        }
+        listOf(-1, 1).forEach { c ->
+            if ((position.second + c) in state.board.indices && state.getPawn(position.first, position.second + c) == State.Pawn.BLACK)
+                kingEncirclement += increaseFactor
+        }
+        return kingEncirclement
     }
 
     // Unused: maybe useful in the future?
@@ -188,19 +259,18 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         var freeDown = false;
         var freeLeft = false;
         var freeRight = false;
-        var res = 0;
 
         if (kingPosition != null) {
             if (kingPosition.first != 0) {
                 freeUp = state.getPawn(kingPosition.first-1, kingPosition.second) != freeFrom
             };
-            if (kingPosition.first != 8) {
+            if (kingPosition.first != state.board.size-1) {
                 freeDown = state.getPawn(kingPosition.first+1, kingPosition.second) != freeFrom
             };
             if (kingPosition.second != 0) {
                 freeLeft = state.getPawn(kingPosition.first, kingPosition.second-1) != freeFrom
             };
-            if (kingPosition.second != 8) {
+            if (kingPosition.second != state.board.size-1) {
                 freeRight = state.getPawn(kingPosition.first, kingPosition.second+1) != freeFrom
             };
         };
@@ -209,5 +279,18 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         else if(freeUp && freeDown) 2
         else if(freeUp && freeDown && freeLeft && freeRight) 3
         else 0
+    }
+
+    //board[col][row]
+    public fun getCol(col: Int, state: State): String {
+        var res = ""
+        state.board[col].forEach { res += it }
+        return res
+    }
+
+    private fun getRow(row: Int, state: State): String {
+        var res = ""
+        state.board.indices.forEach { res += state.board[row][it] }
+        return res
     }
 }
