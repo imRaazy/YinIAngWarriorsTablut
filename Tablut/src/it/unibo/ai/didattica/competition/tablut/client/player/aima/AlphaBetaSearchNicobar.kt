@@ -56,7 +56,6 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
             0 -> moveTowardsWinLine(state)*100  //good line found to win -> go towards victory
             1 -> moveWhiteFarFromKing(state) //king surrounded by whites -> move white away to get the king gang banged from blacks
             2 -> moveWhiteCloseToKing(state)*10 //king feels alone & it's gonna be eat soon -> move white towards king and try to eat some blacks
-            //3 -> eatBlacks(state)*100 //three black around king -> eat them with some white to free the king
             else -> Double.NEGATIVE_INFINITY
         }
     }
@@ -71,7 +70,7 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         pawnsSurrounding.values.forEach { if ( it == State.Pawn.WHITE ) whiteCounter++ else if ( it == State.Pawn.BLACK ) blackCounter++ else emptyCounter++ }
 
         return if ( canWin(kingPosition) ) -1 //if i win then win
-        else if ( kingPosition!!.first == 2 || kingPosition.first == 6 || kingPosition.second == 2 || kingPosition.second == 6 ) 0 //horizontal or vertical free -> go towards victory
+        else if ( kingPosition!!.first == 2 || kingPosition.first == 6 || kingPosition.second == 2 || kingPosition.second == 6 ) 0 //king can move in a possbile win line -> go towards victory
         else if ( whiteCounter > 1 ) 1 //king surrounded by whites -> move white away to get black around
         else if ( shallIMoveWhiteClose(pawnsSurrounding) ) 2 //king feels alone & it's gonna be eat soon -> move white towards king and try to eat some blacks
         else 2 //if it doesnt know what to do, move some white close to the king
@@ -82,51 +81,42 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
         kingSurrounding.values.forEach { if ( it == State.Pawn.BLACK ) blacks++ }
         return kingSurrounding.values.all { it != State.Pawn.WHITE } && blacks >= 2
     }
+
     private fun moveTowardsWinLine(state: State): Double {
-        //todo: refactoring needed here!
+        var score = 0
+        var weight = 50
+        val kingPosition = getKing(state)!!
+
+        score = if( kingPosition.first == 2 || kingPosition.first == 6 ) checkLineObstacles(getRow(kingPosition.first, state), state)
+        else if( kingPosition.second == 2 || kingPosition.second == 6 ) checkLineObstacles(getCol(kingPosition.second, state), state)
+        else 0
+
+        return ( score * weight ).toDouble()
+    }
+
+    //return 2 if 0 obstacles, 1 if 1 obstacle, 0 if 2
+    private fun checkLineObstacles(line: String, state:State): Int {
         var score = 0
         var obstacles = 0
         var pos = 0
         var kingSurpassed = false
         val kingPosition = getKing(state)!!
-
-        if( kingPosition.first == 2 || kingPosition.first == 6 ) {
-            //check row
-            score = 0
-            pos = 0
-            obstacles = 0
-            kingSurpassed = false
-            getRow(kingPosition.first, state).forEach {
-                if( it == 'B' || it == 'W' )
-                    obstacles++
-                if( !kingSurpassed && pos == kingPosition.second  || kingSurpassed && pos == state.board.size - 1 ) {
-                    if ( obstacles == 0 )
-                        score += 50
-                    kingSurpassed = true
-                    obstacles = 0
-                }
-                pos++
+        score = 0
+        pos = 0
+        obstacles = 0
+        kingSurpassed = false
+        line.forEach {
+            if( it == 'B' || it == 'W' )
+                obstacles++
+            if( !kingSurpassed && pos == kingPosition.first  || kingSurpassed && pos == state.board.size - 1 ) {
+                if ( obstacles == 0 )
+                    score++
+                kingSurpassed = true
+                obstacles = 0
             }
+            pos++
         }
-        else if( kingPosition.second == 2 || kingPosition.second == 6 ) {
-            //check col
-            score = 0
-            pos = 0
-            obstacles = 0
-            kingSurpassed = false
-            getCol(kingPosition.second, state).forEach {
-                if( it == 'B' || it == 'W' )
-                    obstacles++
-                if( !kingSurpassed && pos == kingPosition.first  || kingSurpassed && pos == state.board.size - 1 ) {
-                    if ( obstacles == 0 )
-                        score += 50
-                    kingSurpassed = true
-                    obstacles = 0
-                }
-                pos++
-            }
-        }
-        return score.toDouble()
+        return score
     }
 
     //move white towards king to avoid match lost and try to eat blacks
@@ -141,7 +131,7 @@ class AlphaBetaSearchNicobar(game: Game<State, Action, State.Turn>?, utilMin: Do
 
         //buffing weights as whites eats blacks around king
         kingEncirclement += getBlackScoreAround(state, getKing(state)!!, 50)
-        
+
         return kingEncirclement.toDouble()
     }
 
