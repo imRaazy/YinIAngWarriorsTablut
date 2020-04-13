@@ -3,10 +3,10 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util
 import it.unibo.ai.didattica.competition.tablut.domain.State
 class HeuristicUtil {
     companion object {
-        val MAXWHITE = 9
-        val MAXBLACK = 16
-        val whiteGoodLines = listOf(2, 6)
-        val whiteMediumLines = listOf(1, 7)
+        const val MAXWHITE = 9
+        const val MAXBLACK = 16
+        val winnigSquare = listOf(2, 6)
+        val goodSquare = listOf(1, 7)
 
         fun normalizeValue(value: Int, min: Int, max: Int): Double {
             return (value - min).toDouble() / (max - min).toDouble()
