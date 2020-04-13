@@ -2,6 +2,7 @@ package it.unibo.ai.didattica.competition.tablut.client.player.aima
 
 import aima.core.search.adversarial.Game
 import aima.core.search.adversarial.IterativeDeepeningAlphaBetaSearch
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.BlackHeuristic
 import it.unibo.ai.didattica.competition.tablut.domain.Action
 import it.unibo.ai.didattica.competition.tablut.domain.State
 
@@ -22,55 +23,11 @@ class AlphaBetaSearchMilo(game: Game<State, Action, State.Turn>?, utilMin: Doubl
     }
 
     private fun evalBlack(state: State): Double {
-        val numberOfWhiteFactor = 0.3
-        val numberOfBlackFactor = 0.3
-        val kingEncirclementFactor = 0.7
-        val whiteEatingFactor = 0.3
-        // NumberOfPawns
-        val numberOfBlack = state.getNumberOf(State.Pawn.BLACK)
-        val numberOfWhite = state.getNumberOf(State.Pawn.WHITE)
-        // KingEncirclement
-        var kingEncirclement = getKing(state)?.let { getPawnEncirclement(state, it, 20) }
-        // WhiteEating
-        var whiteEating = 0
-        state.board.indices.forEach { r ->
-            state.board.indices.forEach { c ->
-                if (state.getPawn(r, c) == State.Pawn.WHITE)
-                    whiteEating += getPawnEncirclement(state, Pair(r, c), 5)
-            }
-        }
-        state.board.indices.forEach { r ->
-            state.board.indices.forEach { c ->
-                if (state.getPawn(r, c) == State.Pawn.WHITE)
-                    whiteEating += getPawnEncirclement(state, Pair(r, c), 5)
-            }
-        }
-        return kingEncirclementFactor * kingEncirclement!! + whiteEatingFactor * whiteEating - numberOfWhite
+        return BlackHeuristic.genericBlackEval(state)
     }
 
     private fun evalWhite(state: State): Double {
         return Double.NEGATIVE_INFINITY
     }
 
-    private fun getKing(state: State): Pair<Int, Int>? {
-        state.board.indices.forEach { r ->
-            state.board.indices.forEach { c ->
-                if (state.getPawn(r, c) == State.Pawn.KING)
-                    return Pair(r, c)
-            }
-        }
-        return null
-    }
-    private fun getPawnEncirclement(state: State, position: Pair<Int, Int>, increaseFactor: Int): Int {
-        var kingEncirclement = 0
-        listOf(-1, 1).forEach { r ->
-            if ((position.first + r) in state.board.indices && state.getPawn(position.first + r, position.second) == State.Pawn.BLACK)
-                kingEncirclement += increaseFactor
-        }
-        listOf(-1, 1).forEach { c ->
-            if ((position.second + c) in state.board.indices && state.getPawn(position.first, position.second + c) == State.Pawn.BLACK)
-                kingEncirclement += increaseFactor
-        }
-        return kingEncirclement
-    }
 }
