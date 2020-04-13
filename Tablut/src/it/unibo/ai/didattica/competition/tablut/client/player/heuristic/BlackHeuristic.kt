@@ -25,17 +25,19 @@ class BlackHeuristic {
                         whiteEncirclement += HeuristicUtil.getPawnEncirclement(state, Pair(r, c)) { it == State.Pawn.BLACK }
                     if (state.getPawn(r, c) == State.Pawn.KING) {
                         kingEncirclement += HeuristicUtil.getPawnEncirclement(state, Pair(r, c)) { it == State.Pawn.BLACK }
-                        if (r in whiteGoodLines || c in whiteGoodLines)
-                            kingPositioning = WHITEGOODLINE.weight
-                        else if (r in whiteMediumLines || c in whiteMediumLines)
-                            kingPositioning = WHITEMEDIUMLINE.weight
+                        kingPositioning = if (r in whiteGoodLines || c in whiteGoodLines)
+                                            0
+                                        else if (r in whiteMediumLines || c in whiteMediumLines)
+                                            WHITEMEDIUMLINE.weight
+                                        else
+                                            WHITEGOODLINE.weight
                     }
                 }
             }
             //Insert values in the map
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement, 0, 4 * KINGENCICLERMENT.weight, 0.4))
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", kingPositioning, 0, WHITEGOODLINE.weight, 0.4))
-            heuristicInfluenceElement.add(HeuristicElement("NumberOfWhite", numberOfWhite, 0, MAXWHITE, 0.2))
+            heuristicInfluenceElement.add(HeuristicElement("NumberOfWhite", 1/numberOfWhite, 0, 1/MAXWHITE, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfBlack", numberOfBlack, 0, MAXBLACK, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("WhiteEncirclement", whiteEncirclement, 0, numberOfBlack * 2, 0.1))
 
