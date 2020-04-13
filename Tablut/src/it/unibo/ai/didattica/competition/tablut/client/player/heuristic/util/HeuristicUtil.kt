@@ -12,6 +12,10 @@ class HeuristicUtil {
             return (value - min).toDouble() / (max - min).toDouble()
         }
 
+        fun normalizeValue(value: Double, min: Int, max: Int): Double {
+            return (value - min).toDouble() / (max - min).toDouble()
+        }
+
         fun weightedAverage(element: List<Pair<Double, Double>>): Double {
             var numerator = 0.0
             var denominator = 0.0
@@ -28,6 +32,7 @@ class HeuristicUtil {
             }
             return null
         }
+
         fun getPawnEncirclement(state: State, position: Pair<Int, Int>, predicate: (State.Pawn) -> Boolean): Int {
             var pawnEncirclement = 0
             listOf(-1, 1).forEach { r ->
@@ -41,6 +46,69 @@ class HeuristicUtil {
                     pawnEncirclement++
             }
             return pawnEncirclement
+        }
+
+        fun getCrossPawnSurrounding(pawnPosition: Pair<Int, Int>, state: State): MutableMap<String, State.Pawn> {
+            var crossPawnSurrounding = mutableMapOf<String, State.Pawn>()
+            if ( pawnPosition.first != 0 )
+                crossPawnSurrounding["up"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second)
+            if ( pawnPosition.first != state.board.size - 1 )
+                crossPawnSurrounding["down"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second)
+            if ( pawnPosition.second != 0 )
+                crossPawnSurrounding["left"] = state.getPawn(pawnPosition.first, pawnPosition.second - 1)
+            if ( pawnPosition.second != state.board.size - 1 )
+                crossPawnSurrounding["right"] = state.getPawn(pawnPosition.first, pawnPosition.second + 1)
+            return crossPawnSurrounding;
+        }
+
+        fun getDiagonalPawnSurrounding(pawnPosition: Pair<Int, Int>, state: State): MutableMap<String, State.Pawn> {
+            var diagonalPawnSurrounding = mutableMapOf<String, State.Pawn>()
+            if ( pawnPosition.first != 0 && pawnPosition.second != 0)
+                diagonalPawnSurrounding["upleft"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second - 1)
+            if ( pawnPosition.first != state.board.size - 1 && pawnPosition.second != state.board.size - 1 )
+                diagonalPawnSurrounding["downright"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second + 1)
+            if ( pawnPosition.first != state.board.size - 1 && pawnPosition.second != 0 )
+                diagonalPawnSurrounding["downleft"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second - 1)
+            if ( pawnPosition.first != 0 && pawnPosition.second != state.board.size - 1 )
+                diagonalPawnSurrounding["upright"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second + 1)
+            return diagonalPawnSurrounding;
+        }
+
+        fun getCol(col: Int, state: State): String {
+            var res = ""
+            state.board[col].forEach { res += it }
+            return res
+        }
+
+        fun getRow(row: Int, state: State): String {
+            var res = ""
+            state.board.indices.forEach { res += state.board[row][it] }
+            return res
+        }
+
+        //return 2 if 0 obstacles, 1 if 1 obstacle, 0 if 2
+        fun checkLineObstacles(line: String, state:State): Int {
+            var score = 0
+            var obstacles = 0
+            var pos = 0
+            var kingSurpassed = false
+            val kingPosition = getKing(state)!!
+            score = 0
+            pos = 0
+            obstacles = 0
+            kingSurpassed = false
+            line.forEach {
+                if( it == 'B' || it == 'W' )
+                    obstacles++
+                if( !kingSurpassed && pos == kingPosition.first  || kingSurpassed && pos == state.board.size - 1 ) {
+                    if ( obstacles == 0 )
+                        score++
+                    kingSurpassed = true
+                    obstacles = 0
+                }
+                pos++
+            }
+            return score
         }
     }
 }
