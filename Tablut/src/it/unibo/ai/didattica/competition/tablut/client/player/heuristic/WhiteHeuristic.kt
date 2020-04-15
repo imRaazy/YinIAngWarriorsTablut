@@ -6,9 +6,9 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getKing
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getPawnEncirclement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodSquare
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodLine
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.whiteWin
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winnigSquare
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
 
 class WhiteHeuristic {
@@ -43,40 +43,35 @@ class WhiteHeuristic {
             return if (whiteWin(kingPosition)) 1.0
                    else HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
         }
+
         private fun evaluateKingPositioning(kingPosition: Pair<Int, Int>, state: State): Int {
             var kingPositioning = 0
-            if (kingPosition.first in winnigSquare) {
-                kingPositioning += 2
-                if (getRow(kingPosition.first, state).substringBefore("K").contains("B") ||
-                    getRow(kingPosition.first, state).substringAfter("K").contains("B"))
-                    kingPositioning--
-            }
-            if (kingPosition.second in winnigSquare) {
-                kingPositioning += 2
-                if (getCol(kingPosition.first, state).substringBefore("K").contains("B") ||
-                    getCol(kingPosition.first, state).substringAfter("K").contains("B"))
-                    kingPositioning--
-            }
-            if (kingPosition.first in goodSquare) {
-                kingPositioning += 1
-                if (kingPosition.first < 4)
-                    if (getCol(kingPosition.first, state).substringBefore("K").contains("B"))
-                        kingPositioning--
-                    else
-                        if (getCol(kingPosition.first, state).substringAfter("K").contains("B"))
-                            kingPositioning--
-            }
-            if (kingPosition.second in goodSquare) {
-                kingPositioning += 1
-                if (kingPosition.first < 4)
-                    if (getCol(kingPosition.first, state).substringBefore("K").contains("B"))
-                        kingPositioning--
-                    else
-                        if (getCol(kingPosition.first, state).substringAfter("K").contains("B"))
-                            kingPositioning--
-            }
+            if (kingPosition.first in winLine) kingPositioning += checkWinningLineObstacles(getRow(kingPosition.first, state))
+            if (kingPosition.second in winLine) kingPositioning += checkWinningLineObstacles(getCol(kingPosition.second, state))
+            if (kingPosition.first in goodLine) kingPositioning += checkGoodLineObstacles(getRow(kingPosition.first, state))
+            if (kingPosition.second in goodLine) kingPositioning += checkGoodLineObstacles(getCol(kingPosition.second, state))
             return kingPositioning
         }
-    }
 
+        //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
+        private fun checkWinningLineObstacles(line: String): Int {
+            var score = 0
+            if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
+            if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+            return score
+        }
+
+        //return 0 if 1 obstacles, 1 if 0 obstacles
+        private fun checkGoodLineObstacles(line: String): Int {
+            var score = 0
+            if (line.indexOf("K") < 4) {
+                if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W"))
+                    score++
+            } else {
+                if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
+                    score++
+            }
+            return score
+        }
+    }
 }
