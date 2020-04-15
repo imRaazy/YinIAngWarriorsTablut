@@ -3,9 +3,9 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.blackWin
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodSquare
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodLine
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.normalizeValue
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winnigSquare
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
 
 class BlackHeuristic {
@@ -21,9 +21,9 @@ class BlackHeuristic {
                 state.board.indices.forEach { c ->
                     if (state.getPawn(r, c) == State.Pawn.KING) {
                         kingEncirclement += HeuristicUtil.getPawnEncirclement(state, Pair(r, c)) { it == State.Pawn.BLACK }
-                        if (r in winnigSquare || c in winnigSquare)
+                        if (r in winLine || c in winLine)
                             kingPositioning = 2
-                        else if (r in goodSquare || c in goodSquare)
+                        else if (r in goodLine || c in goodLine)
                             kingPositioning = 1
                     }
                     if (state.getPawn(r, c) == State.Pawn.WHITE) {
