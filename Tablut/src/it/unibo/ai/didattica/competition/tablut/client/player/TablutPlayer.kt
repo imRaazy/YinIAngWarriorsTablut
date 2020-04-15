@@ -2,7 +2,9 @@ package it.unibo.ai.didattica.competition.tablut.client.player
 
 import aima.core.search.adversarial.IterativeDeepeningAlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.TablutClient
+import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearchNicobar
+import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearchNicobarWithStates
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.PlayerGame
 import it.unibo.ai.didattica.competition.tablut.domain.*
 
@@ -11,8 +13,8 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
      * Constructors
      */
     constructor(role: String?, name: String?, timeout: Int): this(role, name, timeout, "localhost")
-    constructor(role: String?, name: String?, ipAddress: String?): this(role, name, 59, ipAddress)
-    constructor(role: String?, name: String?): this(role, name, 59, "localhost")
+    constructor(role: String?, name: String?, ipAddress: String?): this(role, name, 58, ipAddress)
+    constructor(role: String?, name: String?): this(role, name, 58, "localhost")
 
     override fun run() {
         val initialState: State
@@ -33,7 +35,7 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 "placeholder"
         )
         // Setting up the search strategy
-        search = AlphaBetaSearchNicobar(game, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, timeout)
+        search = AlphaBetaSearch(game, 0.0, 1.0, timeout)
         search.setLogEnabled(true)
         declareName()
         while (true) {
