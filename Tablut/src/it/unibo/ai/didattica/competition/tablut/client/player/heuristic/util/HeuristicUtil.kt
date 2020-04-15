@@ -7,14 +7,10 @@ class HeuristicUtil {
     companion object {
         const val MAXWHITE = 9
         const val MAXBLACK = 16
-        val winnigSquare = listOf(2, 6)
-        val goodSquare = listOf(1, 7)
+        val winLine = listOf(2, 6)
+        val goodLine = listOf(1, 7)
 
         fun normalizeValue(value: Int, min: Int, max: Int): Double {
-            return (value - min).toDouble() / (max - min).toDouble()
-        }
-
-        fun normalizeValue(value: Double, min: Int, max: Int): Double {
             return (value - min).toDouble() / (max - min).toDouble()
         }
 
@@ -88,34 +84,10 @@ class HeuristicUtil {
             return res
         }
 
-        //return 2 if 0 obstacles, 1 if 1 obstacle, 0 if 2
-        fun checkLineObstacles(line: String, state:State): Int {
-            var score = 0
-            var obstacles = 0
-            var pos = 0
-            var kingSurpassed = false
-            val kingPosition = getKing(state)!!
-            score = 0
-            pos = 0
-            obstacles = 0
-            kingSurpassed = false
-            line.forEach {
-                if( it == 'B' || it == 'W' )
-                    obstacles++
-                if( !kingSurpassed && pos == kingPosition.first  || kingSurpassed && pos == state.board.size - 1 ) {
-                    if ( obstacles == 0 )
-                        score++
-                    kingSurpassed = true
-                    obstacles = 0
-                }
-                pos++
-            }
-            return score
-        }
-
         fun whiteWin(kingPosition: Pair<Int, Int>): Boolean {
             return BoardBox.ESCAPE.boxes.contains(kingPosition)
         }
+
         fun blackWin(state: State): Boolean {
             val kingPosition = getKing(state)!!
             if (getPawnEncirclement(state, kingPosition) { it == State.Pawn.BLACK || it == State.Pawn.THRONE} >= 4 )
