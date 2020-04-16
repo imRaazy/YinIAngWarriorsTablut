@@ -3,8 +3,6 @@ package it.unibo.ai.didattica.competition.tablut.client.player
 import aima.core.search.adversarial.IterativeDeepeningAlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.TablutClient
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearch
-import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearchNicobar
-import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearchNicobarWithStates
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.PlayerGame
 import it.unibo.ai.didattica.competition.tablut.domain.*
 
