@@ -10,7 +10,7 @@ class HeuristicUtil {
         val winLine = listOf(2, 6)
         val goodLine = listOf(1, 7)
 
-        fun normalizeValue(value: Int, min: Int, max: Int): Double {
+        fun normalizeValue(value: Double, min: Int, max: Int): Double {
             return (value - min).toDouble() / (max - min).toDouble()
         }
 
