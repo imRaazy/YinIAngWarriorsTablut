@@ -3,6 +3,8 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getCol
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteWinLineObstacles
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteGoodLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getKing
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getPawnEncirclement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
@@ -47,32 +49,11 @@ class WhiteHeuristic {
 
         private fun evaluateKingPositioning(kingPosition: Pair<Int, Int>, state: State): Int {
             var kingPositioning = 0
-            if (kingPosition.first in winLine) kingPositioning += checkWinningLineObstacles(getRow(kingPosition.first, state))
-            if (kingPosition.second in winLine) kingPositioning += checkWinningLineObstacles(getCol(kingPosition.second, state))
-            if (kingPosition.first in goodLine) kingPositioning += checkGoodLineObstacles(getRow(kingPosition.first, state))
-            if (kingPosition.second in goodLine) kingPositioning += checkGoodLineObstacles(getCol(kingPosition.second, state))
+            if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(getRow(kingPosition.first, state))
+            if (kingPosition.second in winLine) kingPositioning += checkWhiteWinLineObstacles(getCol(kingPosition.second, state))
+            if (kingPosition.first in goodLine) kingPositioning += checkWhiteGoodLineObstacles(getRow(kingPosition.first, state))
+            if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(getCol(kingPosition.second, state))
             return kingPositioning
-        }
-
-        //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
-        private fun checkWinningLineObstacles(line: String): Int {
-            var score = 0
-            if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
-            if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
-            return score
-        }
-
-        //return 0 if 1 obstacles, 1 if 0 obstacles
-        private fun checkGoodLineObstacles(line: String): Int {
-            var score = 0
-            if (line.indexOf("K") < 4) {
-                if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W"))
-                    score++
-            } else {
-                if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
-                    score++
-            }
-            return score
         }
 
         /*

@@ -46,30 +46,25 @@ class HeuristicUtil {
             return pawnEncirclement
         }
 
-        fun getCrossPawnSurrounding(pawnPosition: Pair<Int, Int>, state: State): MutableMap<String, State.Pawn> {
-            var crossPawnSurrounding = mutableMapOf<String, State.Pawn>()
-            if ( pawnPosition.first != 0 )
-                crossPawnSurrounding["up"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second)
-            if ( pawnPosition.first != state.board.size - 1 )
-                crossPawnSurrounding["down"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second)
-            if ( pawnPosition.second != 0 )
-                crossPawnSurrounding["left"] = state.getPawn(pawnPosition.first, pawnPosition.second - 1)
-            if ( pawnPosition.second != state.board.size - 1 )
-                crossPawnSurrounding["right"] = state.getPawn(pawnPosition.first, pawnPosition.second + 1)
-            return crossPawnSurrounding;
+        //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
+        fun checkWhiteWinLineObstacles(line: String): Int {
+            var score = 0
+            if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
+            if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+            return score
         }
 
-        fun getDiagonalPawnSurrounding(pawnPosition: Pair<Int, Int>, state: State): MutableMap<String, State.Pawn> {
-            var diagonalPawnSurrounding = mutableMapOf<String, State.Pawn>()
-            if ( pawnPosition.first != 0 && pawnPosition.second != 0)
-                diagonalPawnSurrounding["upleft"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second - 1)
-            if ( pawnPosition.first != state.board.size - 1 && pawnPosition.second != state.board.size - 1 )
-                diagonalPawnSurrounding["downright"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second + 1)
-            if ( pawnPosition.first != state.board.size - 1 && pawnPosition.second != 0 )
-                diagonalPawnSurrounding["downleft"] = state.getPawn(pawnPosition.first + 1, pawnPosition.second - 1)
-            if ( pawnPosition.first != 0 && pawnPosition.second != state.board.size - 1 )
-                diagonalPawnSurrounding["upright"] = state.getPawn(pawnPosition.first - 1, pawnPosition.second + 1)
-            return diagonalPawnSurrounding;
+        //return 0 if 1 obstacles, 1 if 0 obstacles
+        fun checkWhiteGoodLineObstacles(line: String): Int {
+            var score = 0
+            if (line.indexOf("K") < 4) {
+                if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W"))
+                    score++
+            } else {
+                if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
+                    score++
+            }
+            return score
         }
 
         fun getCol(col: Int, state: State): String {
