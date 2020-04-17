@@ -323,7 +323,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureWhite(State state, Action a) {
+	public State checkCaptureWhite(State state, Action a) {
 		// controllo se mangio a destra
 		if (a.getColumnTo() < state.getBoard().length - 2
 				&& state.getPawn(a.getRowTo(), a.getColumnTo() + 1).equalsPawn("B")
@@ -673,7 +673,7 @@ public class GameAshtonTablut implements Game {
 		return state;
 	}
 
-	private State checkCaptureBlack(State state, Action a) {
+	public State checkCaptureBlack(State state, Action a) {
 
 		this.checkCaptureBlackPawnRight(state, a);
 		this.checkCaptureBlackPawnLeft(state, a);
@@ -687,8 +687,7 @@ public class GameAshtonTablut implements Game {
 		this.movesWithutCapturing++;
 		return state;
 	}
-	// Ho cambiato lo scope della funzione perchè utile in PlayerGame
-	protected State movePawn(State state, Action a) {
+	private State movePawn(State state, Action a) {
 		State.Pawn pawn = state.getPawn(a.getRowFrom(), a.getColumnFrom());
 		State.Pawn[][] newBoard = state.getBoard();
 		// State newState = new State();

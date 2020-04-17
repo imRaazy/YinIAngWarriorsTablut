@@ -1,10 +1,10 @@
 package it.unibo.ai.didattica.competition.tablut.client.player.aima
 
 import aima.core.search.adversarial.Game
-import it.unibo.ai.didattica.competition.tablut.util.Column
 import it.unibo.ai.didattica.competition.tablut.domain.Action
 import it.unibo.ai.didattica.competition.tablut.domain.GameAshtonTablut
 import it.unibo.ai.didattica.competition.tablut.domain.State
+import it.unibo.ai.didattica.competition.tablut.domain.State.Pawn
 import it.unibo.ai.didattica.competition.tablut.domain.StateTablut
 
 /*  Game interface implemented by  GameAshtonTablut is different
@@ -61,7 +61,11 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      *      updated state
      */
     override fun getResult(state: State?, action: Action?): State {
-        return movePawn(state?.clone(), action)
+        if (state != null && action != null) {
+            println(movePawn(state.clone(), action))
+            return movePawn(state.clone(), action)
+        }
+        return initialState
     }
     /**
      * A utility function (also called an objective function or payoff function),
@@ -75,7 +79,7 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
     override fun getUtility(state: State?, turn: State.Turn?): Double {
         if (state !is State || turn !is State.Turn)
             return Double.MIN_VALUE
-        return if (turn == State.Turn.WHITE) state.getNumberOf(State.Pawn.WHITE).toDouble() + 1
+        return if (turn == State.Turn.WHITE) state.getNumberOf(Pawn.WHITE).toDouble() + 1
                else state.getNumberOf(State.Pawn.BLACK).toDouble()
     }
     /**
@@ -97,18 +101,16 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         state.board.indices.forEach { r ->
             state.board.indices.forEach { c ->
                 if (state.getPawn(r, c).equalsPawn(state.turn.toString()) ||
-                        (if (state.turn == State.Turn.WHITE) state.getPawn(r, c) == State.Pawn.KING else true)) {
+                        (if (state.turn == State.Turn.WHITE) state.getPawn(r, c) == Pawn.KING else true)) {
                     rowMap.getOrPut(r) { mutableSetOf(c) }.add(c)
                     columnMap.getOrPut(c) { mutableSetOf(r) }.add(r)
                 }
             }
         }
-//        println(rowMap)
-//        println(columnMap)
         rowMap.keys.forEach { r ->
             state.board.indices.forEach { new_c ->
                 rowMap[r]?.filter { it != new_c }?.forEach { c ->
-                    val action = Action("${Column.getCol(c)}${r+1}", "${Column.getCol(new_c)}${r+1}", state.turn)
+                    val action = Action(state.getBox(r, c), state.getBox(r, new_c), state.turn)
                     if (isAllowed(state, action))
                         actions.add(action)
                 }
@@ -117,12 +119,41 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
         columnMap.keys.forEach { c ->
             state.board.indices.forEach { new_r ->
                 columnMap[c]?.filter { it != new_r }?.forEach { r ->
-                    val action = Action("${Column.getCol(c)}${r+1}", "${Column.getCol(c)}${new_r+1}", state.turn)
+                    val action = Action(state.getBox(r, c), state.getBox(new_r, c), state.turn)
                     if (isAllowed(state, action))
                         actions.add(action)
                 }
             }
         }
+        //println(actions)
         return actions
+    }
+    private fun movePawn(state: State, a: Action): State {
+        val pawn = state.getPawn(a.rowFrom, a.columnFrom)
+        val newBoard = state.board
+        // libero il trono o una casella qualunque
+        if (a.columnFrom == 4 && a.rowFrom == 4) {
+            newBoard[a.rowFrom][a.columnFrom] = Pawn.THRONE
+        } else {
+            newBoard[a.rowFrom][a.columnFrom] = Pawn.EMPTY
+        }
+
+        // metto nel nuovo tabellone la pedina mossa
+        newBoard[a.rowTo][a.columnTo] = pawn
+        // aggiorno il tabellone
+        state.board = newBoard
+        // cambio il turno
+        if (state.turn.equalsTurn(State.Turn.WHITE.toString())) {
+            state.turn = State.Turn.BLACK
+        } else {
+            state.turn = State.Turn.WHITE
+        }
+
+        // a questo punto controllo lo stato per eventuali catture
+        return when {
+            state.turn.equalsTurn("W") -> checkCaptureBlack(state, a)
+            state.turn.equalsTurn("B") -> checkCaptureWhite(state, a)
+            else -> state
+        }
     }
 }
