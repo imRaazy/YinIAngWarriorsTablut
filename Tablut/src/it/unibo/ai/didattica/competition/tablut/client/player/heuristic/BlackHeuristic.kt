@@ -3,10 +3,13 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.blackWin
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteWinLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getCol
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getKing
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodLine
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.normalizeValue
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.weightedAverage
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
@@ -55,14 +58,15 @@ class BlackHeuristic {
             var numberOfBlack = 0 //MAX: 16, MIN: 0
             var numberOfWhite = 0
             var kingEncirclement = 0 //MAX: 4, MIN: 0
-            var kingPosition = HeuristicUtil.getKing(state)!!
             var manhattanDistance = 208 //MAX: 208, MIN: 0
+            var kingPosition = getKing(state)!!
 
             //checking the board status
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
-                    if (state.getPawn(r, c) == State.Pawn.KING)
+                    if (state.getPawn(r, c) == State.Pawn.KING) {
                         kingEncirclement += HeuristicUtil.getPawnEncirclement(state, Pair(r, c)) { it == State.Pawn.BLACK || it == State.Pawn.THRONE } //king enciclement
+                    }
                     if (state.getPawn(r, c) == State.Pawn.WHITE) numberOfWhite++ //number of white
                     if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++ //number of black
@@ -70,17 +74,21 @@ class BlackHeuristic {
                     }
                 }
             }
+            val kingRow = getRow(kingPosition.first, state)
+            val kingCol = getCol(kingPosition.second, state)
 
-            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, state).toDouble(), -12, 22, 0.2))
-            heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, state, kingRow, kingCol).toDouble(), -12, 22, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 208, 0.6))
+            heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
 
-            return if (blackWin(state)) 1.0
-            else HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+            return  if (blackWin(state)) 1.0
+                    else if (checkWhiteWinLineObstacles(kingRow) == 2 || checkWhiteWinLineObstacles(kingCol) == 2 ||
+                            (state.turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow) == 1 || checkWhiteWinLineObstacles(kingCol) == 1))) 0.0
+                    else weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
         }
 
-       /*
+        /*
         * BLACK MIN-MAX:
         * assuming lines 4 as worst lines and lines 2-6 as best
         * the worst gives me +3 (4 citadels and 1 throne)
@@ -94,8 +102,8 @@ class BlackHeuristic {
         * and is surrounded by all black in each line (row and col)
         * this means: + 3 + 3 + 8 + 8 = +22
         */
-        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, state: State): Int {
-            return getBlackLineScore(getRow(kingPosition.first, state), kingPosition.first) + getBlackLineScore(getCol(kingPosition.second, state), kingPosition.second)
+        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, state: State, kingRow: String, kingCol: String): Int {
+            return getBlackLineScore(kingRow, kingPosition.first) + getBlackLineScore(kingCol, kingPosition.second)
         }
 
         //BLACK: citadels +1, throne -1, black +1, white -1, escapes -1, empty 0
