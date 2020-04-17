@@ -10,6 +10,7 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.whiteWin
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
+import it.unibo.ai.didattica.competition.tablut.util.BoardBox
 
 class WhiteHeuristic {
     companion object {
@@ -70,6 +71,41 @@ class WhiteHeuristic {
             } else {
                 if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
                     score++
+            }
+            return score
+        }
+
+        /*
+        * WHITE MIN-MAX
+        * assuming lines 4 as worst lines and lines 2-6 as best
+        * the worst gives me -3 (4 citadels and 1 throne)
+        * the best gives me +2 (2 escapes)
+        * assuming the worst case scenario as all blacks in a line they give me -8 (-1 each)
+        * assuming the best case scenario as all whites in a line they give me +8 (+1 each)
+        * MIN: since we have 16 blacks the min value can be found when the king is on throne
+        * and is surrounded by all black in each line (row and col)
+        * this means: - 3 - 3 - 8 - 8 = -22
+        * MAX: since we have only 8 whites the max value can be found when the king is in a winning row and col
+        * at the same time with one line full of whites and one line empty
+        * this means: + 2 + 2 + 8 = +12
+        */
+        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, state: State): Int {
+            return getWhiteLineScore(getRow(kingPosition.first, state), kingPosition.first) + getWhiteLineScore(getCol(kingPosition.second, state), kingPosition.second)
+        }
+
+        //WHITE: citadels -1, throne +1, black -1, white +1, escapes +1, empty 0
+        private fun getWhiteLineScore(line: String, boardLineIndex: Int): Int {
+            var score = 0
+            var i = 0
+            line.forEach { l ->
+                if(l != 'K') {
+                    if (Pair(boardLineIndex, i) in BoardBox.CITADEL.boxes) score--
+                    if (Pair(boardLineIndex, i) in BoardBox.THRONE.boxes) score++
+                    if (Pair(boardLineIndex, i) in BoardBox.ESCAPE.boxes) score++
+                    if (l == 'B') score--
+                    if (l == 'W') score++
+                }
+                i++
             }
             return score
         }
