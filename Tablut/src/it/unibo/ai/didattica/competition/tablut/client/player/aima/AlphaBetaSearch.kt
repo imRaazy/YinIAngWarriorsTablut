@@ -26,7 +26,7 @@ class AlphaBetaSearch(game: Game<State, Action, State.Turn>?, utilMin: Double, u
     }
 
     private fun evalBlack(state: State): Double {
-        return BlackHeuristic.genericBlackEval(state)
+        return BlackHeuristic.bestBlackEval(state)
     }
 
     private fun evalWhite(state: State): Double {
