@@ -62,7 +62,7 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      */
     override fun getResult(state: State?, action: Action?): State {
         if (state != null && action != null) {
-            println(movePawn(state.clone(), action))
+            //println(movePawn(state.clone(), action))
             return movePawn(state.clone(), action)
         }
         return initialState
