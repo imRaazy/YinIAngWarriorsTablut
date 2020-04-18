@@ -56,23 +56,27 @@ class WhiteHeuristic {
             val kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE } //MAX: 4 MIN: 0
             var numberOfBlack = 0 //MAX 16 MIN:0
             var numberOfWhite = 0 //MAX: 8 MIN: 0
-            var manhattanDistance = 115 //MAX: 115 MIN: 0
+            var whiteManhattanDistance = 115 //MAX: 115 MIN: 0
+            var blackManhattanDistance = 0 //MAX: 115 MIN: 0
 
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
                     if (state.getPawn(r, c) == State.Pawn.WHITE) {
                         numberOfWhite++
-                        manhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c))
+                        whiteManhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) //King says: "I want to feel protect"
                     }
-                    if (state.getPawn(r, c) == State.Pawn.BLACK)
+                    if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++
+                        blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) //King says: "I want to stay away from blacks"
+                    }
                 }
             }
 
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.1))
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -22, 12, 0.2))
-            heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 115, 0.4))
+            heuristicInfluenceElement.add(HeuristicElement("WhiteManhattanDistance", whiteManhattanDistance.toDouble(), 0, 115, 0.4))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.0))
+            //heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 1.2))
             //heuristicInfluenceElement.add(HeuristicElement("KingWinPosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 1.5))
 
             return  when {
