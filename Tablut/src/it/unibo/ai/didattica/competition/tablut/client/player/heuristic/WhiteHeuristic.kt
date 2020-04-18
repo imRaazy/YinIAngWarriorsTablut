@@ -2,6 +2,7 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.blackWin
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getCol
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteWinLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteGoodLineObstacles
@@ -39,20 +40,25 @@ class WhiteHeuristic {
                 }
             }
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPositioning(kingPosition, state).toDouble(), 0, 4, 0.5))
-            heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
-            heuristicInfluenceElement.add(HeuristicElement("NumberOfBlack", 1 / numberOfBlack.toDouble(), 0, 1, 0.2))
-            heuristicInfluenceElement.add(HeuristicElement("BlackEncirclement", blackEncirclement.toDouble(), 0, numberOfWhite*2, 0.1))
-            //heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
-            return if (whiteWin(kingPosition)) 1.0
-                   else HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
+            //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
+            //heuristicInfluenceElement.add(HeuristicElement("NumberOfBlack", 1 / numberOfBlack.toDouble(), 0, 1, 0.2))
+            //heuristicInfluenceElement.add(HeuristicElement("BlackEncirclement", blackEncirclement.toDouble(), 0, numberOfWhite*2, 0.1))
+            heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
+            return  when {
+                        whiteWin(kingPosition) -> 1.0
+                        blackWin(state) -> 0.0
+                        else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
+                    }
         }
 
         private fun evaluateKingPositioning(kingPosition: Pair<Int, Int>, state: State): Int {
+            val kingRow = getRow(kingPosition.first, state)
+            val kingCol = getCol(kingPosition.second, state)
             var kingPositioning = 0
-            if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(getRow(kingPosition.first, state))
-            if (kingPosition.second in winLine) kingPositioning += checkWhiteWinLineObstacles(getCol(kingPosition.second, state))
-            if (kingPosition.first in goodLine) kingPositioning += checkWhiteGoodLineObstacles(getRow(kingPosition.first, state))
-            if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(getCol(kingPosition.second, state))
+            if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(kingRow, kingPosition.first)
+            if (kingPosition.second in winLine) kingPositioning += checkWhiteWinLineObstacles(kingCol, kingPosition.second)
+            if (kingPosition.first in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingRow, kingPosition.first)
+            if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingCol, kingPosition.second)
             return kingPositioning
         }
 
