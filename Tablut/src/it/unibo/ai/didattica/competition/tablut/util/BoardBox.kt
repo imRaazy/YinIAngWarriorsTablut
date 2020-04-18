@@ -9,5 +9,7 @@ enum class BoardBox(val boxes: List<Pair<Int, Int>>) {
     CITADEL(listOf(Pair(0, 3), Pair(0, 4), Pair(0, 5), Pair(4, 1),
                    Pair(8, 3), Pair(8, 4), Pair(8, 5), Pair(1, 4),
                    Pair(3, 8), Pair(4, 8), Pair(5, 8), Pair(7, 4),
-                   Pair(3, 0), Pair(4, 0), Pair(5, 0), Pair(4, 7)))
+                   Pair(3, 0), Pair(4, 0), Pair(5, 0), Pair(4, 7))),
+    KING_SAFE(listOf(Pair(4, 4), Pair(3, 4), Pair(4, 3),
+                     Pair(5, 4), Pair(4, 5)))
 }
