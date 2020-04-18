@@ -3,6 +3,7 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.blackWin
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteGoodLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteWinLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getCol
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getKing
@@ -70,7 +71,7 @@ class BlackHeuristic {
                     if (state.getPawn(r, c) == State.Pawn.WHITE) numberOfWhite++ //number of white
                     if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++ //number of black
-                        manhattanDistance -= pawnToKingManhattanDistance(kingPosition, Pair(r,c)) //total manhattandistance
+                        manhattanDistance -= pawnToKingManhattanDistance(kingPosition, Pair(r, c)) //total manhattandistance
                     }
                 }
             }
@@ -81,7 +82,6 @@ class BlackHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 208, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
-
             return  when {
                         blackWin(state) -> 1.0
                         whiteWin(kingPosition, kingRow, kingCol, state.turn) -> 0.0
@@ -104,7 +104,9 @@ class BlackHeuristic {
         */
         private fun whiteWin(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String, turn: State.Turn): Boolean {
             return  (turn == State.Turn.BLACK && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) == 2 || checkWhiteWinLineObstacles(kingCol, kingPosition.second) == 2)) ||
-                    (turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0))
+                    (turn == State.Turn.BLACK && (checkWhiteGoodLineObstacles(kingRow, kingPosition.first) == 1 && checkWhiteGoodLineObstacles(kingCol, kingPosition.second) == 1)) ||
+                    (turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0)) ||
+                    (turn == State.Turn.WHITE && (checkWhiteGoodLineObstacles(kingRow, kingPosition.first) + checkWhiteGoodLineObstacles(kingCol, kingPosition.second) > 0))
         }
 
         private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
