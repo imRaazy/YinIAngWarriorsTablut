@@ -2,7 +2,6 @@ package it.unibo.ai.didattica.competition.tablut.client.player.heuristic
 
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicElement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.blackWin
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getCol
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteWinLineObstacles
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.checkWhiteGoodLineObstacles
@@ -10,7 +9,6 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getPawnEncirclement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodLine
-import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.whiteWin
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
@@ -22,17 +20,15 @@ class WhiteHeuristic {
             val kingPosition = getKing(state)!!
             var numberOfBlack = 0
             var numberOfWhite = 0
-            var kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE }
-            var blackEncirclement = 0
-            when (kingEncirclement) {
-                4 -> kingEncirclement = 0
-                3 -> kingEncirclement = 1
-                1 -> kingEncirclement = 3
-            }
+//            var kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE }
+//            when (kingEncirclement) {
+//                4 -> kingEncirclement = 0
+//                3 -> kingEncirclement = 1
+//                1 -> kingEncirclement = 3
+//            }
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
                     if (state.getPawn(r, c) == State.Pawn.WHITE) {
-                        blackEncirclement += getPawnEncirclement(state, Pair(r, c)) { it == State.Pawn.BLACK || it == State.Pawn.THRONE }
                         numberOfWhite++
                     }
                     if (state.getPawn(r, c) == State.Pawn.BLACK)
@@ -41,12 +37,9 @@ class WhiteHeuristic {
             }
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPositioning(kingPosition, state).toDouble(), 0, 4, 0.5))
             //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
-            //heuristicInfluenceElement.add(HeuristicElement("NumberOfBlack", 1 / numberOfBlack.toDouble(), 0, 1, 0.2))
-            //heuristicInfluenceElement.add(HeuristicElement("BlackEncirclement", blackEncirclement.toDouble(), 0, numberOfWhite*2, 0.1))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
             return  when {
-                        whiteWin(kingPosition) -> 1.0
-                        blackWin(state) -> 0.0
+                        blackWin(state, kingPosition) -> 0.0
                         else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
                     }
         }
@@ -95,6 +88,25 @@ class WhiteHeuristic {
                 i++
             }
             return score
+        }
+
+        private fun blackWin(state: State, kingPosition: Pair<Int, Int>): Boolean {
+            if (kingPosition in BoardBox.KING_SAFE.boxes &&
+                    getPawnEncirclement(state, kingPosition) { it == State.Pawn.BLACK || it == State.Pawn.THRONE } == 4)
+                return true
+            listOf(-1, 1).forEach { r ->
+                val pawn = kingPosition.first + r to kingPosition.second
+                if (pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK) &&
+                        state.getPawn(kingPosition.first - r, kingPosition.second) == State.Pawn.BLACK)
+                    return true
+            }
+            listOf(-1, 1).forEach { c ->
+                val pawn = kingPosition.first to kingPosition.second + c
+                if (pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK) &&
+                        state.getPawn(kingPosition.first, kingPosition.second - c) == State.Pawn.BLACK)
+                    return true
+            }
+            return false
         }
     }
 }

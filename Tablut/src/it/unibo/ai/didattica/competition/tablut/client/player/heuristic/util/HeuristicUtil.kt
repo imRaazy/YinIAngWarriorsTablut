@@ -1,17 +1,14 @@
 package it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util
 
 import it.unibo.ai.didattica.competition.tablut.domain.State
-import it.unibo.ai.didattica.competition.tablut.util.BoardBox
 
 class HeuristicUtil {
     companion object {
-        const val MAXWHITE = 9
-        const val MAXBLACK = 16
         val winLine = listOf(2, 6)
         val goodLine = listOf(1, 7)
 
         fun normalizeValue(value: Double, min: Int, max: Int): Double {
-            return (value - min).toDouble() / (max - min).toDouble()
+            return (value - min) / (max - min)
         }
 
         fun weightedAverage(element: List<Pair<Double, Double>>): Double {
@@ -81,27 +78,6 @@ class HeuristicUtil {
             var res = ""
             state.board.indices.forEach { res += state.board[row][it] }
             return res
-        }
-
-        fun whiteWin(kingPosition: Pair<Int, Int>): Boolean {
-            return BoardBox.ESCAPE.boxes.contains(kingPosition)
-        }
-
-        fun blackWin(state: State): Boolean {
-            val kingPosition = getKing(state)!!
-            if (getPawnEncirclement(state, kingPosition) { it == State.Pawn.BLACK || it == State.Pawn.THRONE} >= 4 )
-                return true
-            listOf(-1, 1).forEach { r ->
-                if (BoardBox.CITADEL.boxes.contains(Pair(kingPosition.first + r, kingPosition.second)) &&
-                    state.getPawn(kingPosition.first -r, kingPosition.second) == State.Pawn.BLACK )
-                    return true
-            }
-            listOf(-1, 1).forEach { c ->
-                if (BoardBox.CITADEL.boxes.contains(Pair(kingPosition.first, kingPosition.second + c)) &&
-                    state.getPawn(kingPosition.first, kingPosition.second - c) == State.Pawn.BLACK )
-                    return true
-            }
-            return false
         }
     }
 }
