@@ -61,10 +61,8 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      *      updated state
      */
     override fun getResult(state: State?, action: Action?): State {
-        if (state != null && action != null) {
-            //println(movePawn(state.clone(), action))
+        if (state != null && action != null)
             return movePawn(state.clone(), action)
-        }
         return initialState
     }
     /**
@@ -78,9 +76,8 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      */
     override fun getUtility(state: State?, turn: State.Turn?): Double {
         if (state !is State || turn !is State.Turn)
-            return Double.MIN_VALUE
-        return if (turn == State.Turn.WHITE) state.getNumberOf(Pawn.WHITE).toDouble() + 1
-               else state.getNumberOf(State.Pawn.BLACK).toDouble()
+            return -1.0
+        return 1.0
     }
     /**
      *  Returns the set of legal moves in a state
