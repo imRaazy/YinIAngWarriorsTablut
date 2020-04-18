@@ -1,6 +1,7 @@
 package it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util
 
 import it.unibo.ai.didattica.competition.tablut.domain.State
+import kotlin.math.abs
 
 class HeuristicUtil {
     companion object {
@@ -16,6 +17,18 @@ class HeuristicUtil {
             var denominator = 0.0
             element.forEach{ numerator += it.first * it.second; denominator += it.second}
             return numerator/denominator
+        }
+
+        fun getCol(col: Int, state: State): String {
+            var res = ""
+            state.board.indices.forEach { res += state.board[it][col] }
+            return res
+        }
+
+        fun getRow(row: Int, state: State): String {
+            var res = ""
+            state.board.indices.forEach { res += state.board[row][it] }
+            return res
         }
 
         fun getKing(state: State): Pair<Int, Int>? {
@@ -43,6 +56,11 @@ class HeuristicUtil {
             return pawnEncirclement
         }
 
+        //manhattan distance from pawn to pawn
+        fun pawnToPawnManhattanDistance(fromPosition: Pair<Int, Int>, toPosition: Pair<Int, Int>): Int {
+            return abs(fromPosition.first - toPosition.first) + abs(fromPosition.second - toPosition.second)
+        }
+
         //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
         fun checkWhiteWinLineObstacles(line: String, kingLine: Int): Int {
             var score = 0
@@ -66,18 +84,6 @@ class HeuristicUtil {
                 }
             }
             return score
-        }
-
-        fun getCol(col: Int, state: State): String {
-            var res = ""
-            state.board.indices.forEach { res += state.board[it][col] }
-            return res
-        }
-
-        fun getRow(row: Int, state: State): String {
-            var res = ""
-            state.board.indices.forEach { res += state.board[row][it] }
-            return res
         }
     }
 }

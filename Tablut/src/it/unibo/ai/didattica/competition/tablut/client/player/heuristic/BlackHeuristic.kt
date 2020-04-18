@@ -8,6 +8,7 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getKing
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.normalizeValue
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.pawnToPawnManhattanDistance
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.weightedAverage
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
@@ -33,7 +34,7 @@ class BlackHeuristic {
                     if (state.getPawn(r, c) == State.Pawn.WHITE) numberOfWhite++ //number of white
                     if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++ //number of black
-                        manhattanDistance -= pawnToKingManhattanDistance(kingPosition, Pair(r, c)) //total manhattandistance
+                        manhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) //total manhattandistance
                     }
                 }
             }
@@ -83,11 +84,6 @@ class BlackHeuristic {
                 i++
             }
             return score
-        }
-
-        //manhattan distance from pawn to pawn (one is king)
-        private fun pawnToKingManhattanDistance(kingPosition: Pair<Int, Int>, pawnPosition: Pair<Int, Int>): Int {
-            return abs(kingPosition.first - pawnPosition.first) + abs(kingPosition.second - pawnPosition.second)
         }
 
         private fun whiteWin(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String, turn: State.Turn): Boolean {
