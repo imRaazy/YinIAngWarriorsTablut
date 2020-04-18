@@ -61,9 +61,11 @@ class HeuristicUtil {
             var score = 0
             if (kingLine == 1 || kingLine == 7) {
                 if (line.indexOf("K") < 4) {
-                    if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
-                else
-                    if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+                    if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W"))
+                        score++
+                } else {
+                    if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
+                        score++
                 }
             }
             return score
