@@ -49,7 +49,7 @@ class BlackHeuristic {
             //heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 1.0 * numberOfBlack/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
 
             return if (blackWin(state)) 1.0
-                   else HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+                   else weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
         }
 
         //black heuristic function based on: KingPos, KingEncirc, ManhattanFromBlackPawnToKing, PawnDifference, NumOFWhitePawns
@@ -59,7 +59,7 @@ class BlackHeuristic {
             var numberOfWhite = 0
             var kingEncirclement = 0 //MAX: 4, MIN: 0
             var manhattanDistance = 208 //MAX: 208, MIN: 0
-            var kingPosition = getKing(state)!!
+            val kingPosition = getKing(state)!!
 
             //checking the board status
             state.board.indices.forEach { r ->
@@ -77,19 +77,18 @@ class BlackHeuristic {
             val kingRow = getRow(kingPosition.first, state)
             val kingCol = getCol(kingPosition.second, state)
 
-            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, state, kingRow, kingCol).toDouble(), -12, 22, 0.2))
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -12, 22, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 208, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
 
             return  if (blackWin(state)) 1.0
-                    else if (checkWhiteWinLineObstacles(kingRow) == 2 || checkWhiteWinLineObstacles(kingCol) == 2 ||
-                            (state.turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow) == 1 || checkWhiteWinLineObstacles(kingCol) == 1))) 0.0
-                    else weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+                    else if ((checkWhiteWinLineObstacles(kingRow, kingPosition.first) == 2 || checkWhiteWinLineObstacles(kingCol, kingPosition.second) == 2) ||
+                    (state.turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0))) 0.0
+            else weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
         }
 
-        /*
-        * BLACK MIN-MAX:
+        /* BLACK MIN-MAX:
         * assuming lines 4 as worst lines and lines 2-6 as best
         * the worst gives me +3 (4 citadels and 1 throne)
         * the best gives me -2 (2 escapes)
@@ -102,7 +101,7 @@ class BlackHeuristic {
         * and is surrounded by all black in each line (row and col)
         * this means: + 3 + 3 + 8 + 8 = +22
         */
-        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, state: State, kingRow: String, kingCol: String): Int {
+        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
             return getBlackLineScore(kingRow, kingPosition.first) + getBlackLineScore(kingCol, kingPosition.second)
         }
 

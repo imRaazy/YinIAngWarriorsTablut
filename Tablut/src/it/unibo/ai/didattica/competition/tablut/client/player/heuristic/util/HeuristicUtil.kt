@@ -47,10 +47,12 @@ class HeuristicUtil {
         }
 
         //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
-        fun checkWhiteWinLineObstacles(line: String): Int {
+        fun checkWhiteWinLineObstacles(line: String, kingLine: Int): Int {
             var score = 0
-            if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
-            if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+            if(kingLine == 2 || kingLine == 6) {
+                if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
+                if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+            }
             return score
         }
 
@@ -69,7 +71,7 @@ class HeuristicUtil {
 
         fun getCol(col: Int, state: State): String {
             var res = ""
-            state.board[col].forEach { res += it }
+            state.board.indices.forEach { res += state.board[it][col] }
             return res
         }
 
