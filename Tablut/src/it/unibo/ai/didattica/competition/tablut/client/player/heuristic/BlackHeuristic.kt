@@ -82,10 +82,11 @@ class BlackHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
 
-            return  if (blackWin(state)) 1.0
-                    else if ((checkWhiteWinLineObstacles(kingRow, kingPosition.first) == 2 || checkWhiteWinLineObstacles(kingCol, kingPosition.second) == 2) ||
-                    (state.turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0))) 0.0
-            else weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+            return  when {
+                        blackWin(state) -> 1.0
+                        whiteWin(kingPosition, kingRow, kingCol, state.turn) -> 0.0
+                        else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+                    }
         }
 
         /* BLACK MIN-MAX:
@@ -101,6 +102,11 @@ class BlackHeuristic {
         * and is surrounded by all black in each line (row and col)
         * this means: + 3 + 3 + 8 + 8 = +22
         */
+        private fun whiteWin(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String, turn: State.Turn): Boolean {
+            return  (turn == State.Turn.BLACK && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) == 2 || checkWhiteWinLineObstacles(kingCol, kingPosition.second) == 2)) ||
+                    (turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0))
+        }
+
         private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
             return getBlackLineScore(kingRow, kingPosition.first) + getBlackLineScore(kingCol, kingPosition.second)
         }
