@@ -49,7 +49,7 @@ class HeuristicUtil {
         //return 0 if 2 obstacles, 1 if 1 obstacle, 2 if 0 obstacles
         fun checkWhiteWinLineObstacles(line: String, kingLine: Int): Int {
             var score = 0
-            if(kingLine == 2 || kingLine == 6) {
+            if (kingLine == 2 || kingLine == 6) {
                 if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
                 if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
             }
@@ -57,14 +57,14 @@ class HeuristicUtil {
         }
 
         //return 0 if 1 obstacles, 1 if 0 obstacles
-        fun checkWhiteGoodLineObstacles(line: String): Int {
+        fun checkWhiteGoodLineObstacles(line: String, kingLine: Int): Int {
             var score = 0
-            if (line.indexOf("K") < 4) {
-                if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W"))
-                    score++
-            } else {
-                if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W"))
-                    score++
+            if (kingLine == 1 || kingLine == 7) {
+                if (line.indexOf("K") < 4) {
+                    if (!line.substringBefore("K").contains("B") && !line.substringBefore("K").contains("W")) score++
+                else
+                    if (!line.substringAfter("K").contains("B") && !line.substringAfter("K").contains("W")) score++
+                }
             }
             return score
         }
