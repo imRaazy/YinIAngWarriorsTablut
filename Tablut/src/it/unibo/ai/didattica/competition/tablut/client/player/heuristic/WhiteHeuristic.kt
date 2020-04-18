@@ -9,9 +9,11 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getPawnEncirclement
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.getRow
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.goodLine
+import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.pawnToPawnManhattanDistance
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.winLine
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
+import kotlin.math.abs
 
 class WhiteHeuristic {
     companion object {
@@ -20,6 +22,8 @@ class WhiteHeuristic {
             val kingPosition = getKing(state)!!
             var numberOfBlack = 0
             var numberOfWhite = 0
+            val kingRow = getRow(kingPosition.first, state)
+            val kingCol = getCol(kingPosition.second, state)
 //            var kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE }
 //            when (kingEncirclement) {
 //                4 -> kingEncirclement = 0
@@ -35,24 +39,46 @@ class WhiteHeuristic {
                         numberOfBlack++
                 }
             }
-            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPositioning(kingPosition, state).toDouble(), 0, 4, 0.5))
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.5))
             //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
+            return  when {
+                blackWin(state, kingPosition) -> 0.0
+                else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
+            }
+        }
+
+        fun newBornOfWhiteEval(state: State): Double {
+            val heuristicInfluenceElement = mutableListOf<HeuristicElement>()
+            val kingPosition = getKing(state)!!
+            val kingRow = getRow(kingPosition.first, state)
+            val kingCol = getCol(kingPosition.second, state)
+            val kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE } //MAX: 4 MIN: 0
+            var numberOfBlack = 0 //MAX 16 MIN:0
+            var numberOfWhite = 0 //MAX: 8 MIN: 0
+            var manhattanDistance = 115 //MAX: 115 MIN: 0
+
+            state.board.indices.forEach { r ->
+                state.board.indices.forEach { c ->
+                    if (state.getPawn(r, c) == State.Pawn.WHITE) {
+                        numberOfWhite++
+                        manhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c))
+                    }
+                    if (state.getPawn(r, c) == State.Pawn.BLACK)
+                        numberOfBlack++
+                }
+            }
+
+            heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.1))
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -22, 12, 0.2))
+            heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 115, 0.4))
+            heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.0))
+            //heuristicInfluenceElement.add(HeuristicElement("KingWinPosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 1.5))
+
             return  when {
                         blackWin(state, kingPosition) -> 0.0
                         else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
                     }
-        }
-
-        private fun evaluateKingPositioning(kingPosition: Pair<Int, Int>, state: State): Int {
-            val kingRow = getRow(kingPosition.first, state)
-            val kingCol = getCol(kingPosition.second, state)
-            var kingPositioning = 0
-            if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(kingRow, kingPosition.first)
-            if (kingPosition.second in winLine) kingPositioning += checkWhiteWinLineObstacles(kingCol, kingPosition.second)
-            if (kingPosition.first in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingRow, kingPosition.first)
-            if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingCol, kingPosition.second)
-            return kingPositioning
         }
 
         /*
@@ -69,11 +95,11 @@ class WhiteHeuristic {
         * at the same time with one line full of whites and one line empty
         * this means: + 2 + 2 + 8 = +12
         */
-        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, state: State): Int {
-            return getWhiteLineScore(getRow(kingPosition.first, state), kingPosition.first) + getWhiteLineScore(getCol(kingPosition.second, state), kingPosition.second)
+        private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
+            return getWhiteLineScore(kingRow, kingPosition.first) + getWhiteLineScore(kingCol, kingPosition.second)
         }
 
-        //WHITE: citadels -1, throne +1, black -1, white +1, escapes +1, empty 0
+        //WHITE: citadels -1, throne +1, black -1, white +1, escapes +1
         private fun getWhiteLineScore(line: String, boardLineIndex: Int): Int {
             var score = 0
             var i = 0
@@ -88,6 +114,15 @@ class WhiteHeuristic {
                 i++
             }
             return score
+        }
+
+        private fun evaluateKingWinPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
+            var kingPositioning = 0
+            if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(kingRow, kingPosition.first)
+            if (kingPosition.second in winLine) kingPositioning += checkWhiteWinLineObstacles(kingCol, kingPosition.second)
+            if (kingPosition.first in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingRow, kingPosition.first)
+            if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingCol, kingPosition.second)
+            return kingPositioning
         }
 
         private fun blackWin(state: State, kingPosition: Pair<Int, Int>): Boolean {
