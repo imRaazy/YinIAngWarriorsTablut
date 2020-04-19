@@ -78,7 +78,6 @@ class WhiteHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.5))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.0))
             //heuristicInfluenceElement.add(HeuristicElement("KingWinPosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 1.5))
-
             return  when {
                         blackWin(state, kingPosition, kingRow, kingCol) -> 0.0
                         else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
@@ -198,18 +197,14 @@ class WhiteHeuristic {
         private fun getKingEmptyDirection(state: State, kingPosition: Pair<Int, Int>): Direction? {
             listOf(-1, 1).forEach { r ->
                 if ((kingPosition.first + r) in state.board.indices && (state.getPawn(kingPosition.first + r, kingPosition.second) == State.Pawn.EMPTY)) {
-                    return  if (r == -1)
-                        Direction.UP
-                    else
-                        Direction.DOWN
+                    if (r == -1) return Direction.UP
+                    if (r == 1) return Direction.DOWN
                 }
             }
             listOf(-1, 1).forEach { c ->
-                if ((kingPosition.second + c) in state.board.indices && (state.getPawn(kingPosition.first , kingPosition.second + c) == State.Pawn.EMPTY)) {
-                    return  if (c == -1)
-                        Direction.LEFT
-                    else
-                        Direction.RIGHT
+                if ((kingPosition.second + c) in state.board.indices && (state.getPawn(kingPosition.first, kingPosition.second + c) == State.Pawn.EMPTY)) {
+                    if (c == -1) return Direction.LEFT
+                    if (c == 1) return Direction.DOWN
                 }
             }
             return null
