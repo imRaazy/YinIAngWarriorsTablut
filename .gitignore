@@ -2,6 +2,7 @@
 Tablut/bin/
 Tablut/logs/
 Tablut/garbage/
+Tablut/build/
 *.pdf
 
 # Mac DS_Store shit
