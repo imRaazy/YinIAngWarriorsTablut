@@ -176,7 +176,7 @@ class WhiteHeuristic {
 
         private fun checkPerpendicularFullLine(perpendicularLine: String, kingIndex: Int): Boolean {
             val line = perpendicularLine.replaceRange(kingIndex, kingIndex + 1, "K")
-            return checkHalfLine(line, Direction.UP) && checkHalfLine(line, Direction.DOWN)
+            return checkHalfLine(line, Direction.UP) || checkHalfLine(line, Direction.DOWN)
         }
 
         private fun checkHalfLine(kingLine: String, freeDirection: Direction): Boolean {
