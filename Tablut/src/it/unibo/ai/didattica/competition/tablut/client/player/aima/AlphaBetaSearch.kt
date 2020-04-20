@@ -30,7 +30,6 @@ class AlphaBetaSearch(game: Game<State, Action, State.Turn>?, utilMin: Double, u
     }
 
     private fun evalWhite(state: State): Double {
-        return WhiteHeuristic.genericWhiteEval(state)
+        return WhiteHeuristic.newBornOfWhiteEval(state)
     }
-    
 }
