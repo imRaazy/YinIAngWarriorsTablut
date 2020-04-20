@@ -12,7 +12,6 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.weightedAverage
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
-import kotlin.math.abs
 
 class BlackHeuristic {
     companion object {
@@ -47,7 +46,7 @@ class BlackHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
 
             return  when {
-                        whiteWin(kingPosition, kingRow, kingCol, state.turn) -> 0.0
+                        whiteWin(kingPosition, kingRow, kingCol, state.turn) -> Double.NEGATIVE_INFINITY
                         else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
                     }
         }
