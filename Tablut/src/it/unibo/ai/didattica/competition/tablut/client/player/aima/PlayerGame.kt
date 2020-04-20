@@ -75,9 +75,15 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      * @return evaluation
      */
     override fun getUtility(state: State?, turn: State.Turn?): Double {
-        if (state !is State || turn !is State.Turn)
-            return -1.0
-        return 1.0
+        return  if (state !is State || turn !is State.Turn)
+                    Double.NEGATIVE_INFINITY
+                else when {
+                            (turn == State.Turn.BLACK && state.turn == State.Turn.BLACKWIN) ||
+                            (turn == State.Turn.WHITE && state.turn == State.Turn.WHITEWIN) -> Double.POSITIVE_INFINITY
+                            (turn == State.Turn.BLACK && state.turn == State.Turn.WHITEWIN) ||
+                            (turn == State.Turn.WHITE && state.turn == State.Turn.BLACKWIN) -> Double.NEGATIVE_INFINITY
+                            else -> 0.5
+                        }
     }
     /**
      *  Returns the set of legal moves in a state
