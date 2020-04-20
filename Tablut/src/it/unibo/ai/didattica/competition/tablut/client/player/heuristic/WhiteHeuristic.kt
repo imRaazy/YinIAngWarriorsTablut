@@ -14,6 +14,7 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
 import it.unibo.ai.didattica.competition.tablut.util.Direction
+import kotlin.math.abs
 
 class WhiteHeuristic {
     companion object {
@@ -53,21 +54,21 @@ class WhiteHeuristic {
             val kingPosition = getKing(state)!!
             val kingRow = getRow(kingPosition.first, state)
             val kingCol = getCol(kingPosition.second, state)
-            val kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE } //MAX: 4 MIN: 0
-            var numberOfBlack = 0 //MAX 16 MIN:0
-            var numberOfWhite = 0 //MAX: 8 MIN: 0
-            var whiteManhattanDistance = 115 //MAX: 115 MIN: 0
-            var blackManhattanDistance = 0 //MAX: 115 MIN: 0
+            val kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE } // MAX: 4 MIN: 0
+            var numberOfBlack = 0 // MAX 16 MIN:0
+            var numberOfWhite = 0 // MAX: 8 MIN: 0
+            var whiteManhattanDistance = 115 // MAX: 115 MIN: 0
+            var blackManhattanDistance = 0 // MAX: 115 MIN: 0
 
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
                     if (state.getPawn(r, c) == State.Pawn.WHITE) {
                         numberOfWhite++
-                        whiteManhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) //King says: "I want to feel protect"
+                        whiteManhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to feel protect"
                     }
                     if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++
-                        blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) //King says: "I want to stay away from blacks"
+                        blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to stay away from blacks"
                     }
                 }
             }
@@ -78,6 +79,7 @@ class WhiteHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.5))
             heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.0))
             //heuristicInfluenceElement.add(HeuristicElement("KingWinPosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 1.5))
+
             return  when {
                         blackWin(state, kingPosition, kingRow, kingCol) -> 0.0
                         else -> HeuristicUtil.weightedAverage(heuristicInfluenceElement.map { Pair(HeuristicUtil.normalizeValue(it.value, it.min, it.max), it.factor) })
@@ -102,7 +104,7 @@ class WhiteHeuristic {
             return getWhiteLineScore(kingRow, kingPosition.first) + getWhiteLineScore(kingCol, kingPosition.second)
         }
 
-        //WHITE: citadels -1, throne +1, black -1, white +1, escapes +1
+        // WHITE: citadels -1, throne +1, black -1, white +1, escapes +1
         private fun getWhiteLineScore(line: String, boardLineIndex: Int): Int {
             var score = 0
             var i = 0
@@ -136,16 +138,16 @@ class WhiteHeuristic {
                 if (checkKingEmptyDirection(state, getKingEmptyDirection(state, kingPosition)!!, kingPosition, kingRow, kingCol))
                     return true
             }
-            listOf(-1, 1).forEach { r ->
-                val pawn = kingPosition.first + r to kingPosition.second
+            listOf(0, 2).forEach { r ->
+                val pawn = kingPosition.first + r - 1 to kingPosition.second
                 if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-                    checkKingEmptyDirection(state, Direction.formValue(-r), kingPosition, kingRow, kingCol))
+                    checkKingEmptyDirection(state, Direction.fromValue(abs(r - 2)), kingPosition, kingRow, kingCol))
                     return true
             }
             listOf(-1, 1).forEach { c ->
                 val pawn = kingPosition.first to kingPosition.second + c
                 if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-                    checkKingEmptyDirection(state, Direction.formValue(-c), kingPosition, kingRow, kingCol))
+                    checkKingEmptyDirection(state, Direction.fromValue(-c), kingPosition, kingRow, kingCol))
                     return true
             }
             return false
@@ -154,19 +156,19 @@ class WhiteHeuristic {
         private fun checkKingEmptyDirection(state: State, kingEmptyDirection: Direction, kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Boolean {
             when (kingEmptyDirection) {
                 Direction.UP -> {
-                    if (checkHalfLine(kingCol, Direction.UP) || checkPerpendicularFullLine(getRow(kingPosition.first - 1, state), kingPosition.first))
+                    if (checkHalfLine(kingCol, Direction.UP) || checkPerpendicularFullLine(getRow(kingPosition.first - 1, state), kingPosition.second))
                         return true
                 }
                 Direction.LEFT -> {
-                    if (checkHalfLine(kingRow, Direction.LEFT) || checkPerpendicularFullLine(getCol(kingPosition.second - 1, state), kingPosition.second))
+                    if (checkHalfLine(kingRow, Direction.LEFT) || checkPerpendicularFullLine(getCol(kingPosition.second - 1, state), kingPosition.first))
                         return true
                 }
                 Direction.DOWN -> {
-                    if (checkHalfLine(kingCol, Direction.DOWN) || checkPerpendicularFullLine(getRow(kingPosition.first + 1, state), kingPosition.first))
+                    if (checkHalfLine(kingCol, Direction.DOWN) || checkPerpendicularFullLine(getRow(kingPosition.first + 1, state), kingPosition.second))
                         return true
                 }
                 Direction.RIGHT -> {
-                    if (checkHalfLine(kingRow, Direction.RIGHT) || checkPerpendicularFullLine(getCol(kingPosition.second + 1, state), kingPosition.second))
+                    if (checkHalfLine(kingRow, Direction.RIGHT) || checkPerpendicularFullLine(getCol(kingPosition.second + 1, state), kingPosition.first))
                         return true
                 }
                 else -> return false
@@ -182,7 +184,10 @@ class WhiteHeuristic {
         private fun checkHalfLine(kingLine: String, freeDirection: Direction): Boolean {
             if (freeDirection == Direction.UP || freeDirection == Direction.LEFT) {
                 if (kingLine.substringBefore("K").contains("B")) {
-                    if (!kingLine.substringBefore("K").substringAfter("B").contains("W"))
+                    var afterBLine = kingLine.substringBefore("K")
+                    while(afterBLine.contains("B"))
+                        afterBLine = afterBLine.substringAfter("B")
+                    if (!afterBLine.contains("W"))
                         return true
                 }
             } else if (freeDirection == Direction.DOWN || freeDirection == Direction.RIGHT) {
@@ -209,23 +214,5 @@ class WhiteHeuristic {
             }
             return null
         }
-//        private fun blackWin(state: State, kingPosition: Pair<Int, Int>): Boolean {
-//            if (kingPosition in BoardBox.KING_SAFE.boxes &&
-//                    getPawnEncirclement(state, kingPosition) { it == State.Pawn.BLACK || it == State.Pawn.THRONE } == 4)
-//                return true
-//            listOf(-1, 1).forEach { r ->
-//                val pawn = kingPosition.first + r to kingPosition.second
-//                if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-//                    state.getPawn(kingPosition.first - r, kingPosition.second) == State.Pawn.BLACK)
-//                    return true
-//            }
-//            listOf(-1, 1).forEach { c ->
-//                val pawn = kingPosition.first to kingPosition.second + c
-//                if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-//                    state.getPawn(kingPosition.first, kingPosition.second - c) == State.Pawn.BLACK)
-//                    return true
-//            }
-//            return false
-//        }
     }
 }
