@@ -76,9 +76,9 @@ class WhiteHeuristic {
 
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.1))
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -22, 12, 0.2))
-            //heuristicInfluenceElement.add(HeuristicElement("WhiteManhattanDistance", whiteManhattanDistance.toDouble(), 0, 115, 0.4))
-            heuristicInfluenceElement.add(HeuristicElement("WinPosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.35))
-            heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.5))
+            heuristicInfluenceElement.add(HeuristicElement("SuitablePosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.4))
+            //heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.3))
+            heuristicInfluenceElement.add(HeuristicElement("WhiteManhattanDistance", whiteManhattanDistance.toDouble(), 0, 115, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("PawnsDifference", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.2))
 
             return  when {
