@@ -19,36 +19,6 @@ import it.unibo.ai.didattica.competition.tablut.util.Direction
 
 class WhiteHeuristic {
     companion object {
-        fun genericWhiteEval(state: State): Double {
-            val heuristicInfluenceElement = mutableListOf<HeuristicElement>()
-            val kingPosition = getKing(state)!!
-            var numberOfBlack = 0
-            var numberOfWhite = 0
-            val kingRow = getRow(kingPosition.first, state)
-            val kingCol = getCol(kingPosition.second, state)
-//            var kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE }
-//            when (kingEncirclement) {
-//                4 -> kingEncirclement = 0
-//                3 -> kingEncirclement = 1
-//                1 -> kingEncirclement = 3
-//            }
-            state.board.indices.forEach { r ->
-                state.board.indices.forEach { c ->
-                    if (state.getPawn(r, c) == State.Pawn.WHITE) {
-                        numberOfWhite++
-                    }
-                    if (state.getPawn(r, c) == State.Pawn.BLACK)
-                        numberOfBlack++
-                }
-            }
-            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.5))
-            //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
-            heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
-            return  when {
-                blackWin(state, kingPosition, kingRow, kingCol) -> 0.0
-                else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
-            }
-        }
         /**
          * Heuristic function based on a mix of heuristic elements:
          * KingEncirclement, KingPositioning, SuitablePosition, WhiteManhattanDistance, PawnsDifference
@@ -62,7 +32,7 @@ class WhiteHeuristic {
             var numberOfBlack = 0 // MAX 16 MIN:0
             var numberOfWhite = 0 // MAX: 8 MIN: 0
             var whiteManhattanDistance = 115 // MAX: 115 MIN: 0
-            var blackManhattanDistance = 0 // MAX: 208 MIN: 0
+            //var blackManhattanDistance = 0 // MAX: 208 MIN: 0
 
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
@@ -72,7 +42,7 @@ class WhiteHeuristic {
                     }
                     if (state.getPawn(r, c) == State.Pawn.BLACK) {
                         numberOfBlack++
-                        blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to stay away from blacks"
+                        //blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to stay away from blacks"
                     }
                 }
             }
@@ -80,9 +50,9 @@ class WhiteHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.1))
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -22, 12, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("SuitablePosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.4))
-            //heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.3))
             heuristicInfluenceElement.add(HeuristicElement("WhiteManhattanDistance", whiteManhattanDistance.toDouble(), 0, 115, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("PawnsDifference", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 1.2))
+            //heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.3))
 
             return  when {
                         blackWin(state, kingPosition, kingRow, kingCol) -> Double.NEGATIVE_INFINITY
@@ -143,7 +113,8 @@ class WhiteHeuristic {
          *      if the otherSide box can be reached by a black pawn if empty
          */
         private fun blackWin(state: State, kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Boolean {
-            // Check if king is surrounded by three pawns and there is a free black along the empty direction
+            if (state.turn == State.Turn.WHITE)
+                return false
             if (kingPosition in BoardBox.KING_SAFE.boxes &&
                 getPawnEncirclement(state, kingPosition) { it == State.Pawn.BLACK || it == State.Pawn.THRONE } == 3 &&
                 getPawnEncirclement(state, kingPosition) { it == State.Pawn.EMPTY } == 1) {
@@ -240,6 +211,36 @@ class WhiteHeuristic {
                 }
             }
             return null
+        }
+        fun genericWhiteEval(state: State): Double {
+            val heuristicInfluenceElement = mutableListOf<HeuristicElement>()
+            val kingPosition = getKing(state)!!
+            var numberOfBlack = 0
+            var numberOfWhite = 0
+            val kingRow = getRow(kingPosition.first, state)
+            val kingCol = getCol(kingPosition.second, state)
+//            var kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE }
+//            when (kingEncirclement) {
+//                4 -> kingEncirclement = 0
+//                3 -> kingEncirclement = 1
+//                1 -> kingEncirclement = 3
+//            }
+            state.board.indices.forEach { r ->
+                state.board.indices.forEach { c ->
+                    if (state.getPawn(r, c) == State.Pawn.WHITE) {
+                        numberOfWhite++
+                    }
+                    if (state.getPawn(r, c) == State.Pawn.BLACK)
+                        numberOfBlack++
+                }
+            }
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.5))
+            //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 3, 0.3))
+            heuristicInfluenceElement.add(HeuristicElement("NumberOfPawns", 2.0 * numberOfWhite/(numberOfBlack+2*numberOfWhite), 0, 1, 0.2))
+            return  when {
+                blackWin(state, kingPosition, kingRow, kingCol) -> 0.0
+                else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
+            }
         }
     }
 }
