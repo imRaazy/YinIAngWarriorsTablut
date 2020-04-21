@@ -49,7 +49,10 @@ class WhiteHeuristic {
                 else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
             }
         }
-
+        /**
+         * Heuristic function based on a mix of heuristic elements:
+         * KingEncirclement, KingPositioning, SuitablePosition, WhiteManhattanDistance, PawnsDifference
+         */
         fun newBornOfWhiteEval(state: State): Double {
             val heuristicInfluenceElement = mutableListOf<HeuristicElement>()
             val kingPosition = getKing(state)!!
@@ -86,26 +89,23 @@ class WhiteHeuristic {
                         else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
                     }
         }
-
-        /*
-        * WHITE MIN-MAX
-        * assuming lines 4 as worst lines and lines 2-6 as best
-        * the worst gives me -3 (4 citadels and 1 throne)
-        * the best gives me +2 (2 escapes)
-        * assuming the worst case scenario as all blacks in a line they give me -8 (-1 each)
-        * assuming the best case scenario as all whites in a line they give me +8 (+1 each)
-        * MIN: since we have 16 blacks the min value can be found when the king is on throne
-        * and is surrounded by all black in each line (row and col)
-        * this means: - 3 - 3 - 8 - 8 = -22
-        * MAX: since we have only 8 whites the max value can be found when the king is in a winning row and col
-        * at the same time with one line full of whites and one line empty
-        * this means: + 2 + 2 + 8 = +12
-        */
+        /**
+         * Heuristic function used to give weight to moves that brings the king in better lines (weight explained below)
+         * Assuming lines 4 as worst lines and lines 2-6 as best, the worst gives me -3 (4 citadels and 1 throne)
+         * and the best gives me +2 (2 escapes). Assuming the worst case scenario as all blacks in a line,
+         * they give me -8 (-1 each). Assuming the best case scenario as all whites in a line they give me +8 (+1 each)
+         * MIN: since we have 16 blacks the min value can be found when the king is on throne and is surrounded
+         * by all black in each line (row and col), this means: - 3 - 3 - 8 - 8 = -22
+         * MAX: since we have only 8 whites the max value can be found when the king is in a winning row and col
+         * at the same time with one line full of whites and one line empty, this means: + 2 + 2 + 8 = +12
+         */
         private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
             return getWhiteLineScore(kingRow, kingPosition.first) + getWhiteLineScore(kingCol, kingPosition.second)
         }
-
-        // WHITE: citadels -1, throne +1, black -1, white +1, escapes +1
+        /**
+         * Weight to compute a better line to move king, (or pawns)
+         * WHITE Weights: citadels -1, throne +1, black -1, white +1, escapes +1
+         */
         private fun getWhiteLineScore(line: String, boardLineIndex: Int): Int {
             var score = 0
             var i = 0
@@ -121,7 +121,10 @@ class WhiteHeuristic {
             }
             return score
         }
-
+        /**
+         * Heuristic function used to give weight to moves that bring the king in lines suitable for a win
+         * (lines 2-6 called as winLines, and lines 1-7 called as goodLines)
+         */
         private fun evaluateKingWinPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
             var kingPositioning = 0
             if (kingPosition.first in winLine) kingPositioning += checkWhiteWinLineObstacles(kingRow, kingPosition.first)
@@ -130,7 +133,15 @@ class WhiteHeuristic {
             if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingCol, kingPosition.second)
             return kingPositioning
         }
-
+        /**
+         * Used to check if a white move can lead the black player to win.
+         * Three different cases according to Tablut's rules:
+         * 1)   King is in Throne or Throne is next to the king, then king must be surrounded
+         *      by 4 black (if in the throne) of from three black in the other case scenario
+         * 2)   King is outside the "safe areas" and then black player wins if he
+         *      surround the king with only two pawn. If the king is next to a black we check
+         *      if the otherSide box can be reached by a black pawn if empty
+         */
         private fun blackWin(state: State, kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Boolean {
             // Check if king is surrounded by three pawns and there is a free black along the empty direction
             if (kingPosition in BoardBox.KING_SAFE.boxes &&
@@ -141,21 +152,27 @@ class WhiteHeuristic {
             }
             listOf(-1, 1).forEach { r ->
                 val pawn = kingPosition.first + r to kingPosition.second
+                val otherSidePawn = kingPosition.first to kingPosition.second - r
                 val direction = if (r == -1) Direction.DOWN else Direction.UP
                 if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-                    checkKingEmptyDirection(state, direction, kingPosition, kingRow, kingCol))
+                    state.getPawn(otherSidePawn.first, otherSidePawn.second) == State.Pawn.EMPTY && checkKingEmptyDirection(state, direction, kingPosition, kingRow, kingCol))
                     return true
             }
             listOf(-1, 1).forEach { c ->
                 val pawn = kingPosition.first to kingPosition.second + c
+                val otherSidePawn = kingPosition.first to kingPosition.second - c
                 val direction = if (c == -1) Direction.RIGHT else Direction.LEFT
                 if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
-                    checkKingEmptyDirection(state, direction, kingPosition, kingRow, kingCol))
+                    state.getPawn(otherSidePawn.first, otherSidePawn.second) == State.Pawn.EMPTY && checkKingEmptyDirection(state, direction, kingPosition, kingRow, kingCol))
                     return true
             }
             return false
         }
-        // Return true if black can go into an empty position false vice versa
+        /**
+         * Function to call checkHalfLine and checkPerpendicularFullLine in order to check
+         * if the empty box next to the king can be reached by a black from the line of the
+         * empty box of from the perpendicular line
+         */
         private fun checkKingEmptyDirection(state: State, kingEmptyDirection: Direction, kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Boolean {
             when (kingEmptyDirection) {
                 Direction.UP -> {
@@ -177,12 +194,18 @@ class WhiteHeuristic {
             }
             return false
         }
-
+        /**
+         * Function to check if the perpendicular column to an empty box next to the king
+         * has some black that can reach that position in the next move.
+         * It checks half column and the other with checkHalfLine function.
+         */
         private fun checkPerpendicularFullLine(perpendicularLine: String, kingIndex: Int): Boolean {
             val line = perpendicularLine.replaceRange(kingIndex, kingIndex + 1, "K")
             return checkHalfLine(line, Direction.UP) || checkHalfLine(line, Direction.DOWN)
         }
-
+        /**
+         * Function used to check if the empty box next to the king can be reached by a black pawn
+         */
         private fun checkHalfLine(kingLine: String, freeDirection: Direction): Boolean {
             if (freeDirection == Direction.UP || freeDirection == Direction.LEFT) {
                 if (kingLine.substringBefore("K").contains("B")) {
@@ -200,7 +223,9 @@ class WhiteHeuristic {
             }
             return false
         }
-
+        /**
+         * Return the king's empty position surrounding him
+         */
         private fun getKingEmptyDirection(state: State, kingPosition: Pair<Int, Int>): Direction? {
             listOf(-1, 1).forEach { r ->
                 if ((kingPosition.first + r) in state.board.indices && (state.getPawn(kingPosition.first + r, kingPosition.second) == State.Pawn.EMPTY)) {
