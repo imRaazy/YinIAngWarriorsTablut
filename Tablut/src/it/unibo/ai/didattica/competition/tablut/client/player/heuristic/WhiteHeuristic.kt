@@ -123,7 +123,7 @@ class WhiteHeuristic {
             }
             listOf(-1, 1).forEach { r ->
                 val pawn = kingPosition.first + r to kingPosition.second
-                val otherSidePawn = kingPosition.first to kingPosition.second - r
+                val otherSidePawn = kingPosition.first - r to kingPosition.second
                 val direction = if (r == -1) Direction.DOWN else Direction.UP
                 if ((pawn in BoardBox.CITADEL.boxes || (kingPosition !in  BoardBox.KING_SAFE.boxes && state.getPawn(pawn.first, pawn.second) == State.Pawn.BLACK)) &&
                     state.getPawn(otherSidePawn.first, otherSidePawn.second) == State.Pawn.EMPTY && checkKingEmptyDirection(state, direction, kingPosition, kingRow, kingCol))
