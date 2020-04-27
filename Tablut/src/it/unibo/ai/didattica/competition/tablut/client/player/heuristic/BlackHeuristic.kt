@@ -12,6 +12,7 @@ import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.Heu
 import it.unibo.ai.didattica.competition.tablut.client.player.heuristic.util.HeuristicUtil.Companion.weightedAverage
 import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.util.BoardBox
+import it.unibo.ai.didattica.competition.tablut.util.Zone
 
 class BlackHeuristic {
     companion object {
@@ -39,18 +40,20 @@ class BlackHeuristic {
             }
             val kingRow = getRow(kingPosition.first, state)
             val kingCol = getCol(kingPosition.second, state)
+            val kingZone = Zone.getZone(kingPosition)
 
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -12, 22, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 208, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
+            if (kingZone != Zone.NONE)
+                heuristicInfluenceElement.add(HeuristicElement("ZoneWayOut", evaluateZoneWayOut(kingZone, state), 0, 4, 1.5))
 
             return  when {
                         whiteWin(kingPosition, kingRow, kingCol, state.turn) -> Double.NEGATIVE_INFINITY
                         else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
                     }
         }
-
         /* BLACK MIN-MAX:
         * assuming lines 4 as worst lines and lines 2-6 as best
         * the worst gives me +3 (4 citadels and 1 throne)
@@ -75,7 +78,7 @@ class BlackHeuristic {
             line.forEach { l ->
                 if(l != 'K') {
                     if (Pair(boardLineIndex, i) in BoardBox.CITADEL.boxes) score++
-                    if (Pair(boardLineIndex, i) in BoardBox.THRONE.boxes) score--
+                    if (Pair(boardLineIndex, i) in BoardBox.THRONE.boxes) score++
                     if (Pair(boardLineIndex, i) in BoardBox.ESCAPE.boxes) score--
                     if (l == 'B') score++
                     if (l == 'W') score--
@@ -90,6 +93,19 @@ class BlackHeuristic {
                     (turn == State.Turn.BLACK && (checkWhiteGoodLineObstacles(kingRow, kingPosition.first) == 1 && checkWhiteGoodLineObstacles(kingCol, kingPosition.second) == 1)) ||
                     (turn == State.Turn.WHITE && (checkWhiteWinLineObstacles(kingRow, kingPosition.first) + checkWhiteWinLineObstacles(kingCol, kingPosition.second) > 0)) ||
                     (turn == State.Turn.WHITE && (checkWhiteGoodLineObstacles(kingRow, kingPosition.first) + checkWhiteGoodLineObstacles(kingCol, kingPosition.second) > 0))
+        }
+        
+        private fun evaluateZoneWayOut(kingZone: Zone, state: State): Double {
+            var res = 0.0
+            val wayOut = when(kingZone) {
+                Zone.NORTH_WEST -> BoardBox.NORTH_WEST_WAY_OUT.boxes
+                Zone.NORTH_EAST -> BoardBox.NORTH_EAST_WAY_OUT.boxes
+                Zone.SOUTH_WEST -> BoardBox.SOUTH_WEST_WAY_OUT.boxes
+                Zone.SOUTH_EAST -> BoardBox.SOUTH_EAST_WAY_OUT.boxes
+                Zone.NONE -> listOf()
+            }
+            repeat(wayOut.filter { state.getPawn(it.first, it.second) == State.Pawn.BLACK }.size) { res++ }
+            return res
         }
     }
 }
