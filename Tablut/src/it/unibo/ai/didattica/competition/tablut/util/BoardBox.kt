@@ -12,14 +12,27 @@ enum class BoardBox(val boxes: List<Pair<Int, Int>>) {
                    Pair(3, 0), Pair(4, 0), Pair(5, 0), Pair(4, 7))),
     KING_SAFE(listOf(Pair(4, 4), Pair(3, 4), Pair(4, 3),
                      Pair(5, 4), Pair(4, 5))),
-    // Vie di fuga sulla croce all'altezza del trono
-//    NORTH_WEST_WAY_OUT(listOf(Pair(2, 4), Pair(3, 4), Pair(4, 2), Pair(4, 3))),
-//    NORTH_EAST_WAY_OUT(listOf(Pair(2, 4), Pair(3, 4), Pair(4, 5), Pair(4, 6))),
-//    SOUTH_WEST_WAY_OUT(listOf(Pair(5, 4), Pair(6, 4), Pair(4, 2), Pair(4, 3))),
-//    SOUTH_EAST_WAY_OUT(listOf(Pair(5, 4), Pair(6, 4), Pair(4, 5), Pair(4, 6)))
-    // Vie di fuga spostate
+    NORTH_WEST_CROSS_WAY_OUT(listOf(Pair(2, 4), Pair(3, 4), Pair(4, 2), Pair(4, 3))),
+    NORTH_EAST_CROSS_WAY_OUT(listOf(Pair(2, 4), Pair(3, 4), Pair(4, 5), Pair(4, 6))),
+    SOUTH_WEST_CROSS_WAY_OUT(listOf(Pair(5, 4), Pair(6, 4), Pair(4, 2), Pair(4, 3))),
+    SOUTH_EAST_CROSS_WAY_OUT(listOf(Pair(5, 4), Pair(6, 4), Pair(4, 5), Pair(4, 6))),
     NORTH_WEST_WAY_OUT(listOf(Pair(2, 5), Pair(3, 5), Pair(5, 2), Pair(5, 3))),
     NORTH_EAST_WAY_OUT(listOf(Pair(2, 3), Pair(3, 3), Pair(5, 5), Pair(5, 6))),
     SOUTH_WEST_WAY_OUT(listOf(Pair(5, 5), Pair(6, 5), Pair(3, 2), Pair(3, 3))),
-    SOUTH_EAST_WAY_OUT(listOf(Pair(5, 3), Pair(6, 3), Pair(3, 5), Pair(3, 6)))
+    SOUTH_EAST_WAY_OUT(listOf(Pair(5, 3), Pair(6, 3), Pair(3, 5), Pair(3, 6)));
+
+    companion object {
+        fun getPairedWayOut(zone: Zone): List<Pair<Pair<Int, Int>, Pair<Int, Int>>> {
+            val range = NORTH_WEST_WAY_OUT.boxes.indices
+            val pairedWayOut = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()
+            when (zone) {
+                Zone.NORTH_WEST -> range.forEach { pairedWayOut.add(Pair(NORTH_WEST_WAY_OUT.boxes[it], NORTH_WEST_CROSS_WAY_OUT.boxes[it])) }
+                Zone.NORTH_EAST -> range.forEach { pairedWayOut.add(Pair(NORTH_EAST_WAY_OUT.boxes[it], NORTH_EAST_CROSS_WAY_OUT.boxes[it])) }
+                Zone.SOUTH_WEST -> range.forEach { pairedWayOut.add(Pair(SOUTH_WEST_WAY_OUT.boxes[it], SOUTH_WEST_CROSS_WAY_OUT.boxes[it])) }
+                Zone.SOUTH_EAST -> range.forEach { pairedWayOut.add(Pair(SOUTH_EAST_WAY_OUT.boxes[it], SOUTH_EAST_CROSS_WAY_OUT.boxes[it])) }
+                else -> {}
+            }
+            return pairedWayOut
+        }
+    }
 }
