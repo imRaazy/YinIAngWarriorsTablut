@@ -97,14 +97,13 @@ class BlackHeuristic {
         
         private fun evaluateZoneWayOut(kingZone: Zone, state: State): Double {
             var res = 0.0
-            val wayOut = when(kingZone) {
-                Zone.NORTH_WEST -> BoardBox.NORTH_WEST_WAY_OUT.boxes
-                Zone.NORTH_EAST -> BoardBox.NORTH_EAST_WAY_OUT.boxes
-                Zone.SOUTH_WEST -> BoardBox.SOUTH_WEST_WAY_OUT.boxes
-                Zone.SOUTH_EAST -> BoardBox.SOUTH_EAST_WAY_OUT.boxes
-                Zone.NONE -> listOf()
+            val wayOut = BoardBox.getPairedWayOut(kingZone)
+            wayOut.forEach {
+                if (state.getPawn(it.first.first, it.first.second) == State.Pawn.BLACK) {
+                    res++
+                    if (state.getPawn(it.second.first, it.second.second) != State.Pawn.EMPTY) res -= 0.5
+                }
             }
-            repeat(wayOut.filter { state.getPawn(it.first, it.second) == State.Pawn.BLACK }.size) { res++ }
             return res
         }
     }
