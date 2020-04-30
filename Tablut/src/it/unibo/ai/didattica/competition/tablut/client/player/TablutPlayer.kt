@@ -5,6 +5,7 @@ import it.unibo.ai.didattica.competition.tablut.client.TablutClient
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.AlphaBetaSearch
 import it.unibo.ai.didattica.competition.tablut.client.player.aima.PlayerGame
 import it.unibo.ai.didattica.competition.tablut.domain.*
+import kotlin.system.exitProcess
 
 class TablutPlayer(private val role: String?, name: String?, val timeout: Int, ipAddress: String?): TablutClient(role, name, timeout, ipAddress) {
     /**
@@ -45,7 +46,23 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 println("Chosen move = $action\nTakes: $duration seconds")
                 write(action)
             } else {
-                println("Waiting for the opposite move...")
+                when (state.turn) {
+                    State.Turn.WHITEWIN -> {
+                        if (player == State.Turn.WHITE) println("YOU WIN")
+                        else if (player == State.Turn.BLACK) println("YOU LOOSE")
+                        exitProcess(0)
+                    }
+                    State.Turn.BLACKWIN -> {
+                        if (player == State.Turn.BLACK) println("YOU WIN")
+                        else if (player == State.Turn.WHITE) println("YOU LOOSE")
+                        exitProcess(0)
+                    }
+                    State.Turn.DRAW -> {
+                        println("DRAW")
+                        exitProcess(0)
+                    }
+                    else -> println("Waiting for the opposite move...")
+                }
             }
         }
     }
