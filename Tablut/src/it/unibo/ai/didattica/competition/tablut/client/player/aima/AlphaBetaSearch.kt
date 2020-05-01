@@ -22,14 +22,6 @@ class AlphaBetaSearch(game: Game<State, Action, State.Turn>?, utilMin: Double, u
         super.eval(state, turn)
         if (game.isTerminal(state))
             return game.getUtility(state, turn)
-        return if (turn == State.Turn.BLACK) evalBlack(state) else evalWhite(state)
-    }
-
-    private fun evalBlack(state: State): Double {
-        return BlackHeuristic.bestBlackEval(state)
-    }
-
-    private fun evalWhite(state: State): Double {
-        return WhiteHeuristic.newBornOfWhiteEval(state)
+        return if (turn == State.Turn.BLACK) BlackHeuristic.blackEval(state) else WhiteHeuristic.whiteEval(state)
     }
 }

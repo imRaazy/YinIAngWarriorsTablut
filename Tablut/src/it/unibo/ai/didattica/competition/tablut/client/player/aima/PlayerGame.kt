@@ -7,16 +7,8 @@ import it.unibo.ai.didattica.competition.tablut.domain.State
 import it.unibo.ai.didattica.competition.tablut.domain.State.Pawn
 import it.unibo.ai.didattica.competition.tablut.domain.StateTablut
 
-/*  Game interface implemented by  GameAshtonTablut is different
-    form the Game interface implemented by PlayerGame: the first
-    is a Tablut domain interface when the second belongs to aima */
-class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
-    constructor(state: State?, repeated_moves_allowed: Int, cache_size: Int, logs_folder: String?, whiteName: String?, blackName: String?) :
-            super(state, repeated_moves_allowed, cache_size, logs_folder, whiteName, blackName)
-    constructor(repeated_moves_allowed: Int, cache_size: Int, logs_folder: String?, whiteName: String?, blackName: String?):
-            super(repeated_moves_allowed, cache_size, logs_folder, whiteName, blackName)
-
-    // Aima Game methods
+class PlayerGame(state: State?, repeated_moves_allowed: Int, cache_size: Int, logs_folder: String?, whiteName: String?, blackName: String?):
+        GameAshtonTablut(state, repeated_moves_allowed, cache_size, logs_folder, whiteName, blackName), Game<State, Action, State.Turn> {
     /**
      * Get initial game state
      * @return initial game state
@@ -93,8 +85,6 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
      */
     override fun getActions(state: State?): MutableList<Action> {
         val actions = mutableListOf<Action>()
-        // ColumnMap and RowMap are redundant but thanks to them
-        // is possible to reduce the complexity of the computation
         val columnMap = mutableMapOf<Int, MutableSet<Int>>()
         val rowMap = mutableMapOf<Int, MutableSet<Int>>()
         if (state !is State)
@@ -128,31 +118,23 @@ class PlayerGame: GameAshtonTablut, Game<State, Action, State.Turn> {
                 }
             }
         }
-        //println(actions)
         return actions
     }
     private fun movePawn(state: State, a: Action): State {
         val pawn = state.getPawn(a.rowFrom, a.columnFrom)
         val newBoard = state.board
-        // libero il trono o una casella qualunque
         if (a.columnFrom == 4 && a.rowFrom == 4) {
             newBoard[a.rowFrom][a.columnFrom] = Pawn.THRONE
         } else {
             newBoard[a.rowFrom][a.columnFrom] = Pawn.EMPTY
         }
-
-        // metto nel nuovo tabellone la pedina mossa
         newBoard[a.rowTo][a.columnTo] = pawn
-        // aggiorno il tabellone
         state.board = newBoard
-        // cambio il turno
         if (state.turn.equalsTurn(State.Turn.WHITE.toString())) {
             state.turn = State.Turn.BLACK
         } else {
             state.turn = State.Turn.WHITE
         }
-
-        // a questo punto controllo lo stato per eventuali catture
         return when {
             state.turn.equalsTurn("W") -> checkCaptureBlack(state, a)
             state.turn.equalsTurn("B") -> checkCaptureWhite(state, a)

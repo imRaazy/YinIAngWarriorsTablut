@@ -1,5 +1,9 @@
 package it.unibo.ai.didattica.competition.tablut.util
-
+/**
+ * Enum for relevant board boxes
+ * @param boxes
+ *      list of boxes'coordinates
+ */
 enum class BoardBox(val boxes: List<Pair<Int, Int>>) {
     THRONE(listOf(Pair(4, 4))),
     ESCAPE(listOf(Pair(0, 1), Pair(0, 2), Pair(0, 6), Pair(0, 7),
@@ -20,8 +24,13 @@ enum class BoardBox(val boxes: List<Pair<Int, Int>>) {
     NORTH_EAST_WAY_OUT(listOf(Pair(2, 3), Pair(3, 3), Pair(5, 5), Pair(5, 6))),
     SOUTH_WEST_WAY_OUT(listOf(Pair(5, 5), Pair(6, 5), Pair(3, 2), Pair(3, 3))),
     SOUTH_EAST_WAY_OUT(listOf(Pair(5, 3), Pair(6, 3), Pair(3, 5), Pair(3, 6)));
-
     companion object {
+        /**
+         * Get escape positions based on king's zone
+         * @param zone
+         *      zone of the king
+         * @return escapes
+         */
         fun getPairedWayOut(zone: Zone): List<Pair<Pair<Int, Int>, Pair<Int, Int>>> {
             val range = NORTH_WEST_WAY_OUT.boxes.indices
             val pairedWayOut = mutableListOf<Pair<Pair<Int, Int>, Pair<Int, Int>>>()

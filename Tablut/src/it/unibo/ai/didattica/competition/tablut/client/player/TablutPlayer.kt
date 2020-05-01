@@ -8,9 +8,6 @@ import it.unibo.ai.didattica.competition.tablut.domain.*
 import kotlin.system.exitProcess
 
 class TablutPlayer(private val role: String?, name: String?, val timeout: Int, ipAddress: String?): TablutClient(role, name, timeout, ipAddress) {
-    /**
-     * Constructors
-     */
     constructor(role: String?, name: String?, timeout: Int): this(role, name, timeout, "localhost")
     constructor(role: String?, name: String?, ipAddress: String?): this(role, name, 58, ipAddress)
     constructor(role: String?, name: String?): this(role, name, 58, "localhost")
@@ -21,10 +18,8 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
         val search: IterativeDeepeningAlphaBetaSearch<State, Action, State.Turn>
         var state: State
         println("You are player $role!")
-        // Setting up the initial state and player turn
         initialState = StateTablut()
         initialState.turn = role?.let { State.Turn.valueOf(it.toUpperCase()) }
-        // Setting up the game model
         game = PlayerGame(
                 initialState,
                 99,
@@ -33,7 +28,6 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 "placeholder",
                 "placeholder"
         )
-        // Setting up the search strategy
         search = AlphaBetaSearch(game, 0.0, 1.0, timeout)
         search.setLogEnabled(true)
         declareName()
@@ -67,6 +61,12 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
         }
     }
 
+    /**
+     * Measure the time required by a function
+     * @param block
+     *      function to be measured
+     * @return time required
+     */
     private fun <R> executeAndMeasureTimeSeconds(block: () -> R): Pair<R, Double> {
         val start = System.currentTimeMillis()
         val result = block()

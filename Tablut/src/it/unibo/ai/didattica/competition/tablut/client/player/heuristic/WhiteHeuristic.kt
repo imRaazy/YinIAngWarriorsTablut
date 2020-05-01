@@ -20,39 +20,35 @@ class WhiteHeuristic {
     companion object {
         /**
          * Heuristic function based on a mix of heuristic elements:
-         * KingEncirclement, KingPositioning, SuitablePosition, WhiteManhattanDistance, PawnsDifference
+         *      PawnsDifference (MAX: 1, MIN: 0, WEIGHT: 1.4),
+         *      KingPositioning (MAX: 2, MIN: -24, WEIGHT: 0.2),
+         *      WhiteManhattanDistance (MAX: 115, MIN: 0, WEIGHT: 0.6),
+         *      SuitablePosition (MAX: 4, MIN: 0, WEIGHT: 0.4)
+         * @param state
+         *      game state
+         * @return white heuristic evaluation
          */
-        fun newBornOfWhiteEval(state: State): Double {
+        fun whiteEval(state: State): Double {
             val heuristicInfluenceElement = mutableListOf<HeuristicElement>()
             val kingPosition = getKing(state)!!
             val kingRow = getRow(kingPosition.first, state)
             val kingCol = getCol(kingPosition.second, state)
-            //val kingEncirclement = getPawnEncirclement(state, kingPosition) { it == State.Pawn.WHITE } // MAX: 4 MIN: 0
             var numberOfBlack = 0 // MAX 16 MIN:0
             var numberOfWhite = 0 // MAX: 8 MIN: 0
-            var whiteManhattanDistance = 115 // MAX: 115 MIN: 0
-            //var blackManhattanDistance = 0 // MAX: 208 MIN: 0
-
+            var whiteManhattanDistance = 115
             state.board.indices.forEach { r ->
                 state.board.indices.forEach { c ->
                     if (state.getPawn(r, c) == State.Pawn.WHITE) {
                         numberOfWhite++
-                        whiteManhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to feel protect"
+                        whiteManhattanDistance -= pawnToPawnManhattanDistance(kingPosition, Pair(r, c))
                     }
-                    if (state.getPawn(r, c) == State.Pawn.BLACK) {
-                        numberOfBlack++
-                        //blackManhattanDistance += pawnToPawnManhattanDistance(kingPosition, Pair(r, c)) // King says: "I want to stay away from blacks"
-                    }
+                    if (state.getPawn(r, c) == State.Pawn.BLACK) numberOfBlack++
                 }
             }
-
-            //heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 0.1))
-            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -24, 2, 0.2))
+            heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -24, 4, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("SuitablePosition", evaluateKingWinPosition(kingPosition, kingRow, kingCol).toDouble(), 0, 4, 0.4))
             heuristicInfluenceElement.add(HeuristicElement("WhiteManhattanDistance", whiteManhattanDistance.toDouble(), 0, 115, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("PawnsDifference", 2.0 * numberOfWhite / (numberOfBlack + 2 * numberOfWhite), 0, 1, 1.4))
-            //heuristicInfluenceElement.add(HeuristicElement("BlackManhattanDistanceReverse", blackManhattanDistance.toDouble(), 0, 208, 0.3))
-
             return when {
                 blackWin(state, kingPosition, kingRow, kingCol) -> Double.NEGATIVE_INFINITY
                 else -> weightedAverage(heuristicInfluenceElement.map { Pair(normalizeValue(it.value, it.min, it.max), it.factor) })
@@ -61,23 +57,34 @@ class WhiteHeuristic {
 
         /**
          * Heuristic function used to give weight to moves that brings the king in better lines (weight explained below)
-         * Assuming lines 4 as worst lines and lines 2-6 as best, the worst gives me -3 (4 citadels and 1 throne)
+         * Assuming lines 4 as worst lines and lines 2-6 as best, the worst gives me -5 (4 citadels and 1 throne)
          * and the best gives me +2 (2 escapes). Assuming the worst case scenario as all blacks in a line,
-         * they give me -8 (-1 each). Assuming the best case scenario as all whites in a line they give me +8 (+1 each)
+         * they give me -8 (-1 each). Assuming the best case scenario as all whites in a line they give me +0
          * MIN: since we have 16 blacks the min value can be found when the king is on throne and is surrounded
-         * by all black in each line (row and col), this means: - 3 - 3 - 8 - 8 = -22
+         * by all black in each line (row and col), this means: -7 -7 -5 -5 = -24
          * MAX: since we have only 8 whites the max value can be found when the king is in a winning row and col
-         * at the same time with one line full of whites and one line empty, this means: + 2 + 2 + 8 = +12
+         * at the same time with one line full of whites and one line empty, this means: + 2 + 2 = +4
+         * @param kingPosition
+         *      king position as Pair(row, col)
+         * @param kingRow
+         *      king row as string
+         * @param kingCol
+         *      king col as string
+         * @return king position evaluation
          */
         private fun evaluateKingPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
-            return getWhiteLineScore(kingRow, kingPosition.first) + getWhiteLineScore(kingCol, kingPosition.second)
+            return getLineScore(kingRow, kingPosition.first) + getLineScore(kingCol, kingPosition.second)
         }
-
         /**
          * Weight to compute a better line to move king, (or pawns)
-         * WHITE Weights: citadels -1, throne -1, black -1, escapes +1
+         * Gives the following score: citadels -1, throne -1, black -1, escapes +1
+         * @param line
+         *      row or col as string
+         * @param boardLineIndex
+         *      index of the line
+         * @return line score
          */
-        private fun getWhiteLineScore(line: String, boardLineIndex: Int): Int {
+        private fun getLineScore(line: String, boardLineIndex: Int): Int {
             var score = 0
             var i = 0
             line.forEach { l ->
@@ -91,10 +98,16 @@ class WhiteHeuristic {
             }
             return score
         }
-
         /**
          * Heuristic function used to give weight to moves that bring the king in lines suitable for a win
          * (lines 2-6 called as winLines, and lines 1-7 called as goodLines)
+         * @param kingPosition
+         *      king position as Pair(row, col)
+         * @param kingRow
+         *      king row as string
+         * @param kingCol
+         *      king col as string
+         * @return king suitable position evaluation
          */
         private fun evaluateKingWinPosition(kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Int {
             var kingPositioning = 0
@@ -104,16 +117,24 @@ class WhiteHeuristic {
             if (kingPosition.second in goodLine) kingPositioning += checkWhiteGoodLineObstacles(kingCol, kingPosition.second)
             return kingPositioning
         }
-
         /**
-         * Used to check if a white move can lead the black player to win.
+         * Check if white move bring black to win
          * Three different cases according to Tablut's rules:
          * 1)   King is in Throne or Throne is next to the king, then king must be surrounded
          *      by 4 black (if in the throne) of from three black in the other case scenario
          * 2)   King is outside the "safe areas" and then black player wins if he
-         *      surround the king with only two pawn. If the king is next to a black we check
+         *      surrounds the king with only two pawn. If the king is next to a black we check
          *      if the otherSide box can be reached by a black pawn if empty
-         */
+         * @param state
+         *      state of the game
+         * @param kingPosition
+         *      king position as Pair(row, col)
+         * @param kingRow
+         *      king row as string
+         * @param kingCol
+         *      king col as string
+         * @return true if black win in the next move false otherwise
+        */
         private fun blackWin(state: State, kingPosition: Pair<Int, Int>, kingRow: String, kingCol: String): Boolean {
             if (state.turn == State.Turn.WHITE)
                 return false
@@ -141,7 +162,6 @@ class WhiteHeuristic {
             }
             return false
         }
-
         /**
          * Function to call checkHalfLine and checkPerpendicularFullLine in order to check
          * if the empty box next to the king can be reached by a black from the line of the
@@ -168,7 +188,6 @@ class WhiteHeuristic {
             }
             return false
         }
-
         /**
          * Function to check if the perpendicular column to an empty box next to the king
          * has some black that can reach that position in the next move.
@@ -178,7 +197,6 @@ class WhiteHeuristic {
             val line = perpendicularLine.replaceRange(kingIndex, kingIndex + 1, "K")
             return checkHalfLine(line, Direction.UP) || checkHalfLine(line, Direction.DOWN)
         }
-
         /**
          * Function used to check if the empty box next to the king can be reached by a black pawn
          */
@@ -199,7 +217,6 @@ class WhiteHeuristic {
             }
             return false
         }
-
         /**
          * Return the king's empty position surrounding him
          */
