@@ -5,6 +5,10 @@ Tablut/garbage/
 Tablut/build/
 *.pdf
 
+# Artifacts build folders
+Tablut/classes/
+Tablut/src/META-INF/
+
 # Mac DS_Store shit
 *.DS_Store
 
