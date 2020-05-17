@@ -9,7 +9,6 @@ import kotlin.system.exitProcess
 
 class TablutPlayer(private val role: String?, name: String?, val timeout: Int, ipAddress: String?): TablutClient(role, name, timeout, ipAddress) {
     constructor(role: String?, name: String?, timeout: Int): this(role, name, timeout, "localhost")
-    constructor(role: String?, name: String?, ipAddress: String?): this(role, name, 58, ipAddress)
     constructor(role: String?, name: String?): this(role, name, 58, "localhost")
 
     override fun run() {
