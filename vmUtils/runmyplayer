@@ -1,0 +1,40 @@
+#!/bin/bash
+# YinIAngWarriors launch util
+# USAGE: ./runmyplayer -p <playerRole> -h <ipAddress> -t <timeout>
+ipAddress="localhost"
+timeout="57"
+playerRole=""
+while test $# -gt 0; do
+  case "$1" in
+    --help)
+      shift
+      echo "USAGE: ./runmyplayer -p <playerRole> -h <ipAddress> -t <timeout>"
+      exit 0
+      shift
+      ;;
+    -p)
+      shift
+      playerRole=$1
+      shift
+      ;;
+    -h)
+      shift
+      ipAddress=$1
+      shift
+      ;;
+    -t)
+      shift
+      if test $1 -gt 57; then
+        timeout="57"
+      else
+        timeout=$1
+      fi
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+java -jar YinIAngWarriors.jar -p $playerRole -h $ipAddress -t $timeout
