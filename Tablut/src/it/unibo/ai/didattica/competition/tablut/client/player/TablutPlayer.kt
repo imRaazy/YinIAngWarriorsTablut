@@ -16,7 +16,14 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
         val game: PlayerGame
         val search: IterativeDeepeningAlphaBetaSearch<State, Action, State.Turn>
         var state: State
-        println("You are player $role!")
+        println("         ,o888b,`?88888         YinIAng Warriors          88888P',d888o,\n" +
+                "       ,8888 888   ?888           Player $role            888P   888 8888,\n" +
+                "       8888888P'    888                                   888    `?8888888\n" +
+                "       888P'        888               UNIBO               888        `?888\n" +
+                "       `88   O     d888          Tablut Challenge         888b     O   88'\n" +
+                "         `?._  _.o88888                                   88888o._  _.P'\n" +
+                "                                     Made by\n" +
+                "                  Nicolò Bartelucci, Milo Marchetti, Nicolò Saccone")
         initialState = StateTablut()
         initialState.turn = role?.let { State.Turn.valueOf(it.toUpperCase()) }
         game = PlayerGame(
@@ -24,11 +31,11 @@ class TablutPlayer(private val role: String?, name: String?, val timeout: Int, i
                 99,
                 0,
                 "garbage",
-                "placeholder",
-                "placeholder"
+                "WHITE",
+                "BLACK"
         )
         search = AlphaBetaSearch(game, 0.0, 1.0, timeout)
-        search.setLogEnabled(true)
+        search.setLogEnabled(false)
         declareName()
         while (true) {
             read()
