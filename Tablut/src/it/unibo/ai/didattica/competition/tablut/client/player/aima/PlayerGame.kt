@@ -136,8 +136,8 @@ class PlayerGame(state: State?, repeated_moves_allowed: Int, cache_size: Int, lo
             state.turn = State.Turn.WHITE
         }
         return when {
-            state.turn.equalsTurn("W") -> checkCaptureBlack(state, a)
-            state.turn.equalsTurn("B") -> checkCaptureWhite(state, a)
+            state.turn.equalsTurn("W") -> checkCaptureBlack(state, a, false)
+            state.turn.equalsTurn("B") -> checkCaptureWhite(state, a, false)
             else -> state
         }
     }
