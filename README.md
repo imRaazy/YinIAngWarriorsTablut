@@ -55,6 +55,6 @@ java -jar YinIAngWarriors.jar -p $playerRole -h $ipAddress -t $timeout
 2) Import the entire project (Tablut folder) in IntelliJIdea, create a run configuration and run TablutPlayerLauncher.kt
 
 ## Contributors
-Milo Marchetti - @imRaazy
-Nicolò Bartelucci - @nicobargit
+Milo Marchetti - @imRaazy<br>
+Nicolò Bartelucci - @nicobargit<br>
 Nicolò Saccone - @nicosac97
