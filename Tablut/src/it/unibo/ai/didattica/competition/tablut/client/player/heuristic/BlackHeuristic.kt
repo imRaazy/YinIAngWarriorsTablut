@@ -52,7 +52,6 @@ class BlackHeuristic {
             heuristicInfluenceElement.add(HeuristicElement("KingPositioning", evaluateKingPosition(kingPosition, kingRow, kingCol).toDouble(), -12, 22, 0.2))
             heuristicInfluenceElement.add(HeuristicElement("ManhattanDistance", manhattanDistance.toDouble(), 0, 208, 0.6))
             heuristicInfluenceElement.add(HeuristicElement("KingEncirclement", kingEncirclement.toDouble(), 0, 4, 1.2))
-           // heuristicInfluenceElement.add(HeuristicElement("PawnDifference", numberOfBlack.toDouble()/(numberOfBlack+2*numberOfWhite), 0, 1, 2.0))
             heuristicInfluenceElement.add(HeuristicElement("BlackPawns", numberOfBlack.toDouble(), 0, 16, 1.5))
             heuristicInfluenceElement.add(HeuristicElement("WhitePawns", 8-numberOfWhite.toDouble(), 0, 8, 1.8))
             if (kingZone != Zone.NONE)
