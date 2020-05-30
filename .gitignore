@@ -3,7 +3,6 @@ Tablut/bin/
 Tablut/logs/
 Tablut/garbage/
 Tablut/build/
-*.pdf
 
 # Artifacts build folders
 Tablut/classes/
